@@ -1,4 +1,4 @@
-package com.example.athidya.myapplication;
+package com.example.athidya.mydataapp;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

@@ -1,4 +1,4 @@
-package com.example.athidya.myapplication;
+package com.example.athidya.mydataapp;
 
 import org.junit.Test;
 
