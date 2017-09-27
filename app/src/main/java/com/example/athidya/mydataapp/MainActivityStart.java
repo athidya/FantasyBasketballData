@@ -20,6 +20,8 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import oauth.signpost.OAuth;
+import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
+import oauth.signpost.commonshttp.CommonsHttpOAuthProvider;
 import oauth.signpost.*;
 import org.apache.*;
 
