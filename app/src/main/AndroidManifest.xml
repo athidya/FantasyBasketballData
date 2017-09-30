@@ -38,6 +38,10 @@
         <activity
             android:name=".loginyahoo"
             android:label="@string/title_activity_loginyahoo"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".code"
+            android:label="@string/title_activity_code"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

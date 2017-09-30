@@ -35,8 +35,8 @@ public class MainActivityStart extends AppCompatActivity {
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
 
-    String CONSUMER_KEY = "";
-    String CONSUMER_SECRET = "";
+    String CONSUMER_KEY = "dj0yJmk9aFl3bUFQTmdUUzdFJmQ9WVdrOWFGaHRObTlzTmpJbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD02MA--";
+    String CONSUMER_SECRET = "e11fcfa6ffaa42d031421af91dbbd1ee2f7ffb41";
     private String requestToken;
     private String accessToken;
     private String currentNonce;
@@ -54,8 +54,7 @@ public class MainActivityStart extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
         });
 
@@ -68,18 +67,18 @@ public class MainActivityStart extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //login webview attempt
-                /*Intent login = new Intent(getApplicationContext(), loginyahoo.class);
-                startActivity(login);*/
+                Intent login = new Intent(getApplicationContext(), loginyahoo.class);
+                startActivity(login);
 
                 //authentication
-                String url = "https://api.login.yahoo.com/oauth2/request_auth?" +
+                /* String url = "https://api.login.yahoo.com/oauth2/request_auth?" +
                         "client_id=" + CONSUMER_KEY +
                         "&response_type=code" + "&redirect_uri=oob" +
                         "&scope=openid%20fspt-r" +
                         "&nonce=" + createNonce();
                 Uri uri = Uri.parse(url);
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
+                startActivity(intent); */
             }
         });
 

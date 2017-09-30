@@ -1,5 +1,6 @@
 package com.example.athidya.mydataapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -15,8 +16,8 @@ import java.util.Random;
 
 public class loginyahoo extends AppCompatActivity {
 
-    String CONSUMER_KEY = "";
-    String CONSUMER_SECRET = "";
+    String CONSUMER_KEY = "dj0yJmk9aFl3bUFQTmdUUzdFJmQ9WVdrOWFGaHRObTlzTmpJbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD02MA--";
+    String CONSUMER_SECRET = "e11fcfa6ffaa42d031421af91dbbd1ee2f7ffb41";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,9 @@ public class loginyahoo extends AppCompatActivity {
                 "&scope=openid%20fspt-r" +
                 "&nonce=" + createNonce();
         webview.loadUrl(url);
+
+        Intent gettoken = new Intent(getApplicationContext(), code.class);
+        startActivity(gettoken);
     }
     private String createNonce() {
         String timestamp = new SimpleDateFormat("yyMMddHHmmss").format(new java.util.Date());
