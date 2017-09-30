@@ -27,11 +27,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
-import oauth.signpost.OAuth;
-import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
-import oauth.signpost.commonshttp.CommonsHttpOAuthProvider;
-import oauth.signpost.*;
-import oauth.signpost.signature.HmacSha1MessageSigner;
 
 public class MainActivityStart extends AppCompatActivity {
 
@@ -39,25 +34,9 @@ public class MainActivityStart extends AppCompatActivity {
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
-    private GoogleApiClient client;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client2;
-
-
-
-    private static final String REQUEST_TOKEN_ENDPOINT_URL = "https://api.login.yahoo.com/oauth/v2/get_request_token";
-    private static final String ACCESS_TOKEN_ENDPOINT_URL = "https://api.login.yahoo.com/oauth/v2/get_access_token";
-    private static final String AUTHORIZE_WEBSITE_URL = "https://api.login.yahoo.com/oauth/v2/request_auth";
-    private static final int PIN_DIALOG = 0;
-    String CALLBACK_URL = OAuth.OUT_OF_BAND; //check android manifest for scheme and host if error
 
     String CONSUMER_KEY = "";
     String CONSUMER_SECRET = "";
-    private CommonsHttpOAuthConsumer myConsumer;
-    private CommonsHttpOAuthProvider myProvider;
     private String requestToken;
     private String accessToken;
     private String currentNonce;
@@ -67,7 +46,6 @@ public class MainActivityStart extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        callOauth();
         //showDialog(PIN_DIALOG);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -155,17 +133,6 @@ public class MainActivityStart extends AppCompatActivity {
         String saltStr = salt.toString();
         return saltStr;
 
-    }
-    private void callOauth() {
-        try {
-            //retrieve consumer token and sign in
-            myConsumer = new CommonsHttpOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
-            myConsumer.setMessageSigner(new HmacSha1MessageSigner());
-            // client = new
-
-        } catch (Exception ex) {
-            Toast.makeText(getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
-        }
     }
 
 
