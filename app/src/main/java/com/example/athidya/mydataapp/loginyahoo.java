@@ -16,8 +16,8 @@ import java.util.Random;
 
 public class loginyahoo extends AppCompatActivity {
 
-    String CONSUMER_KEY = "dj0yJmk9aFl3bUFQTmdUUzdFJmQ9WVdrOWFGaHRObTlzTmpJbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD02MA--";
-    String CONSUMER_SECRET = "e11fcfa6ffaa42d031421af91dbbd1ee2f7ffb41";
+    String CONSUMER_KEY = "";
+    String CONSUMER_SECRET = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

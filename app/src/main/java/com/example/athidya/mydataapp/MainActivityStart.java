@@ -35,8 +35,8 @@ public class MainActivityStart extends AppCompatActivity {
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
 
-    String CONSUMER_KEY = "dj0yJmk9aFl3bUFQTmdUUzdFJmQ9WVdrOWFGaHRObTlzTmpJbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD02MA--";
-    String CONSUMER_SECRET = "e11fcfa6ffaa42d031421af91dbbd1ee2f7ffb41";
+    String CONSUMER_KEY = "";
+    String CONSUMER_SECRET = "";
     private String requestToken;
     private String accessToken;
     private String currentNonce;
