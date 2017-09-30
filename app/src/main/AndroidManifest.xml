@@ -22,8 +22,9 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-                <data android:host= "oob" />
-                <data android:scheme="oob"/>
+
+                <data android:host="oob" />
+                <data android:scheme="oob" />
             </intent-filter>
         </activity>
         <!--
@@ -35,8 +36,9 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".LoginActivity"
-            android:label="@string/title_activity_login"></activity>
+            android:name=".loginyahoo"
+            android:label="@string/title_activity_loginyahoo"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
