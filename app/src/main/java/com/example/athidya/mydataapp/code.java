@@ -1,5 +1,6 @@
 package com.example.athidya.mydataapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -8,11 +9,13 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputFilter;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 public class code extends AppCompatActivity {
     String code = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,6 +33,7 @@ public class code extends AppCompatActivity {
         });
 
         final TextView prompt = (TextView) findViewById(R.id.textView);
+        final Button button = (Button) findViewById(R.id.button7);
 
         final EditText entercode = (EditText) findViewById(R.id.editText);
         entercode.setFilters(new InputFilter[] {new InputFilter.LengthFilter(7)});
@@ -38,6 +42,15 @@ public class code extends AppCompatActivity {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 code = entercode.getText().toString();
                 return false;
+            }
+        });
+
+        button.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                //login webview attempt
+
+
             }
         });
 
