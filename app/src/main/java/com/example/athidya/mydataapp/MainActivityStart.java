@@ -1,7 +1,6 @@
 package com.example.athidya.mydataapp;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -11,21 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.android.gms.common.api.GoogleApiClient;
-
-import java.security.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Random;
 
 
 public class MainActivityStart extends AppCompatActivity {
@@ -35,18 +19,13 @@ public class MainActivityStart extends AppCompatActivity {
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
 
-    String CONSUMER_KEY = "";
+    String CONSUMER_KEY = "--";
     String CONSUMER_SECRET = "";
-    private String requestToken;
-    private String accessToken;
-    private String currentNonce;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //showDialog(PIN_DIALOG);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -58,19 +37,15 @@ public class MainActivityStart extends AppCompatActivity {
             }
         });
 
-
         Button button = (Button) findViewById(R.id.button);
-        final TextView mTextView = (TextView) findViewById(R.id.textView2);
-
-
         button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                //login webview attempt
+                //calling webview login in loginyahoo.class
                 Intent login = new Intent(getApplicationContext(), loginyahoo.class);
                 startActivity(login);
 
-                //authentication
+                //authentication *working* for reference
                 /* String url = "https://api.login.yahoo.com/oauth2/request_auth?" +
                         "client_id=" + CONSUMER_KEY +
                         "&response_type=code" + "&redirect_uri=oob" +
@@ -82,8 +57,7 @@ public class MainActivityStart extends AppCompatActivity {
             }
         });
 
-
-
+        //example volley request *working* for reference
         /* button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -113,27 +87,6 @@ public class MainActivityStart extends AppCompatActivity {
 
 
     }
-
-    private String createNonce() {
-        String timestamp = new SimpleDateFormat("yyMMddHHmmss").format(new java.util.Date());
-        String nonce = getSaltString();
-        return nonce.substring(0,3) + timestamp + nonce.substring(4,7);
-    }
-
-    //random alphanumeric string generator
-    private String getSaltString() {
-        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
-        StringBuilder salt = new StringBuilder();
-        Random rnd = new Random();
-        while (salt.length() < 8) { // length of the random string.
-            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
-            salt.append(SALTCHARS.charAt(index));
-        }
-        String saltStr = salt.toString();
-        return saltStr;
-
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

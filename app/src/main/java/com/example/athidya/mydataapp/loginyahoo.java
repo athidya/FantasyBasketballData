@@ -16,8 +16,7 @@ import java.util.Random;
 
 public class loginyahoo extends AppCompatActivity {
 
-    String CONSUMER_KEY = "";
-    String CONSUMER_SECRET = "";
+    String CONSUMER_KEY = "--";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,9 +33,11 @@ public class loginyahoo extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        //create webview view
         WebView webview = new WebView(this);
         setContentView(webview);
 
+        //url to open authentication request
         String url = "https://api.login.yahoo.com/oauth2/request_auth?" +
                 "client_id=" + CONSUMER_KEY +
                 "&response_type=code" + "&redirect_uri=oob" +
@@ -44,16 +45,20 @@ public class loginyahoo extends AppCompatActivity {
                 "&nonce=" + createNonce();
         webview.loadUrl(url);
 
-        Intent gettoken = new Intent(getApplicationContext(), code.class);
-        startActivity(gettoken);
+        //starts code.class so that user will be able to input code on return from authentication request
+        Intent getToken = new Intent(getApplicationContext(), code.class);
+        startActivity(getToken);
     }
+
+    //creating nonce used in url of authentication request
+    //uses year, date, time, and random alphanumeric string to create semi-random value necessary for nonce
     private String createNonce() {
         String timestamp = new SimpleDateFormat("yyMMddHHmmss").format(new java.util.Date());
         String nonce = getSaltString();
         return nonce.substring(0,3) + timestamp + nonce.substring(4,7);
     }
 
-    //random alphanumeric string generator
+    //random alphanumeric string generator used in createNonce
     private String getSaltString() {
         String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
         StringBuilder salt = new StringBuilder();

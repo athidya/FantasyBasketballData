@@ -31,13 +31,22 @@ import org.json.JSONArray;
 import java.util.HashMap;
 import java.util.Map;
 
+import static android.R.attr.prompt;
 import static android.R.attr.tag;
+import static com.example.athidya.mydataapp.R.id.textView;
 
 public class code extends AppCompatActivity {
     String code = "";
-    String CONSUMER_KEY = "";
+    String CONSUMER_KEY = "--";
     String CONSUMER_SECRET = "";
-    String TokenResponse = "";
+    String [] TokenResponse = new String[6];
+    String access_token = "";
+    String id_token = "";
+    String expires_in = "";
+    String token_type = "";
+    String refresh_token="";
+    String xoauth_yahoo_guid="";
+
     @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +64,13 @@ public class code extends AppCompatActivity {
             }
         });
 
-        final TextView prompt = (TextView) findViewById(R.id.textView);
+        final TextView prompt = (TextView) findViewById(textView);
         final Button button = (Button) findViewById(R.id.button7);
 
         final EditText entercode = (EditText) findViewById(R.id.editText);
         entercode.setFilters(new InputFilter[] {new InputFilter.LengthFilter(7)});
 
+        //NEXT button that initiates trying to get token from yahoo given the code
         button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -68,12 +78,16 @@ public class code extends AppCompatActivity {
                 code = entercode.getText().toString();
                 RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
                 String url = "https://api.login.yahoo.com/oauth2/get_token";
+
+                //set up request HTTP POST with header and body params
                 StringRequest tokenreq = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
 
+                    //response handler
                     @Override
                     public void onResponse(String response) {
-                        Log.d("Response", response.toString());
-                        TokenResponse = response.toString();
+                        Log.d("Response", response);
+                        TokenResponse = response.split(",");
+                        decodeResponse(TokenResponse); //assigns TokenResponse values to the necessary parameters eg. access_token, id_token and such
                     }
                 }, new Response.ErrorListener(){
                     @Override
@@ -81,6 +95,7 @@ public class code extends AppCompatActivity {
                         prompt.setText(error.toString());
                     }
                 }){
+                    //parameters for request body
                     @Override
                     protected Map<String, String> getParams() {
                         Map<String, String> params = new HashMap<String, String>();
@@ -91,6 +106,7 @@ public class code extends AppCompatActivity {
                         params.put("client_secrect", CONSUMER_SECRET);
                         return params;
                     }
+                    //parameters for request header
                     @Override
                     public Map<String, String> getHeaders() throws AuthFailureError {
                         HashMap<String, String> headers = new HashMap<String, String>();
@@ -99,11 +115,23 @@ public class code extends AppCompatActivity {
                         return headers;
                     }
                 };
-                queue.add(tokenreq);
+                queue.add(tokenreq); //start request
 
             }
         });
-
     }
-
+    //assigns parameter values to local strings
+    public void decodeResponse(String[] response) {
+        access_token = getres(response[0]);
+        id_token = getres(response[1]);
+        expires_in = getres(response[2]);
+        token_type = getres(response[3]);
+        refresh_token = getres(response[4]);
+        xoauth_yahoo_guid = getres(response[5]);
+    }
+    //repetitive splitting and assignment part of decodeResponse
+    public String getres (String rep) {
+        String[] temp = rep.split(":");
+        return temp[1].replace("\"", "");
+    }
 }
