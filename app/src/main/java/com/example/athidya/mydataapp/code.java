@@ -29,8 +29,10 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 
 import static android.R.attr.prompt;
@@ -143,12 +145,24 @@ public class code extends AppCompatActivity {
         token_type = getres(response[3]);
         xoauth_yahoo_guid = getres(response[4]);
         id_token = getres(response[5]);
-        String[] temp = id_token.split(".");
-        Log.d("id_token", id_token);
-        jose_header = Base64.decode(temp[0], Base64.DEFAULT).toString(); //giving null error currently :(
-        payload = Base64.decode(temp[1], Base64.DEFAULT).toString();
-        temp[2] = temp[2].replace("}", "");
-        signature = Base64.decode(temp[2], Base64.DEFAULT).toString();
+        //handle id_token params and decode them from base64 encoding
+        String[] temp = id_token.split(Pattern.quote("."));
+        byte[] jose = Base64.decode(temp[0], Base64.DEFAULT);
+        try {
+            jose_header = new String(jose, "UTF-8");
+        } catch(UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        Log.d("paybefore",temp[1]);
+        byte[] pay = Base64.decode(temp[1], Base64.DEFAULT);
+        try {
+            payload = new String(pay, "UTF-8");
+        }catch(UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        temp[2] = temp[2].replaceAll("\\}", "");
+        signature = temp[2];
+        Log.d("payafter", payload);
 
     }
     //repetitive splitting and assignment part of decodeResponse
