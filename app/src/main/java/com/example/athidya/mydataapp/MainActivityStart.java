@@ -46,7 +46,6 @@ public class MainActivityStart extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //showDialog(PIN_DIALOG);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -60,18 +59,16 @@ public class MainActivityStart extends AppCompatActivity {
 
 
         Button button = (Button) findViewById(R.id.button);
-        final TextView mTextView = (TextView) findViewById(R.id.textView2);
-
 
         button.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
                 //login webview attempt
-                //Intent login = new Intent(getApplicationContext(), loginyahoo.class);
-                Intent login = new Intent(getApplicationContext(), SathActivity.class);
+                Intent login = new Intent(getApplicationContext(), loginyahoo.class);
+                //Intent login = new Intent(getApplicationContext(), SathActivity.class);
                 startActivity(login);
 
-                //authentication
+                //authentication *working* for reference
                 /* String url = "https://api.login.yahoo.com/oauth2/request_auth?" +
                         "client_id=" + CONSUMER_KEY +
                         "&response_type=code" + "&redirect_uri=oob" +
@@ -84,7 +81,7 @@ public class MainActivityStart extends AppCompatActivity {
         });
 
 
-
+        //volley example request *working* for reference
         /* button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,28 +111,6 @@ public class MainActivityStart extends AppCompatActivity {
 
 
     }
-
-    private String createNonce() {
-        String timestamp = new SimpleDateFormat("yyMMddHHmmss").format(new java.util.Date());
-        String nonce = getSaltString();
-        return nonce.substring(0,3) + timestamp + nonce.substring(4,7);
-    }
-
-    //random alphanumeric string generator
-    private String getSaltString() {
-        String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
-        StringBuilder salt = new StringBuilder();
-        Random rnd = new Random();
-        while (salt.length() < 8) { // length of the random string.
-            int index = (int) (rnd.nextFloat() * SALTCHARS.length());
-            salt.append(SALTCHARS.charAt(index));
-        }
-        String saltStr = salt.toString();
-        return saltStr;
-
-    }
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
