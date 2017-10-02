@@ -8,10 +8,10 @@ import java.util.Random;
 
 public class PlayerInfo {
 
-    private Random rand = new Random();
+    public Random rand = new Random();
     private String firstName;
     private String lastName;
-    public int fieldGoalAttempts,fieldGoalMade,
+    protected int fieldGoalAttempts,fieldGoalMade,
     freeThrowAttempts,freeThrowMade,
     threePointsMade,
     points,
@@ -20,7 +20,7 @@ public class PlayerInfo {
     steals,
     blocks,
     turnovers;
-    public float fieldGoalPercentage,freeThrowPercentage;
+    protected float fieldGoalPercentage,freeThrowPercentage;
 
 
     public PlayerInfo(String firstName, String lastName)

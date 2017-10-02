@@ -1,5 +1,6 @@
 package com.example.athidya.mydataapp;
 
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.ViewGroup;
@@ -119,8 +120,8 @@ public class SathActivity extends AppCompatActivity {
         athidyaPlayers[11] = new PlayerInfo("popavich","lonzo");
         athidyaPlayers[12] = new PlayerInfo("ball","test");
 
-        final GMTeamInfo sathTeam = new GMTeamInfo("Sath's rookie team",sathPlayers);
-        final GMTeamInfo athidyaTeam = new GMTeamInfo("Athidya's cool team",sathPlayers);
+        GMTeamInfo sathTeam = new GMTeamInfo("Sath's rookie team",sathPlayers);
+        GMTeamInfo athidyaTeam = new GMTeamInfo("Athidya's cool team",athidyaPlayers);
 
         Random rand = new Random();
 
@@ -128,7 +129,6 @@ public class SathActivity extends AppCompatActivity {
             sathTeam.players[i].generateRandomStat();
             athidyaTeam.players[i].generateRandomStat();
 
-            //sathTeam.players[i].printStats();
         }
 
         //Above is just the creation of the random stats to random players. We have done the above
@@ -149,15 +149,42 @@ public class SathActivity extends AppCompatActivity {
         int[] t1_s = sathTeam.TotalScore();
         int[] t2_s = athidyaTeam.TotalScore();
 
+        //Puts in the score and compares
         for (int i = 0; i < t1_p.length+t1_s.length; i++) {
             if (i<2){
+                if (t1_p[i]>t2_p[i]) {
+                    buttonArray[i * 3 + 7].setBackgroundColor(Color.GREEN);
+                    buttonArray[i*3+8].setBackgroundColor(Color.RED);
+                }
+                else{
+                    buttonArray[i * 3 + 7].setBackgroundColor(Color.RED);
+                    buttonArray[i*3+8].setBackgroundColor(Color.GREEN);
+                }
+
                 buttonArray[i*3+7].setText(String.format("%.1f", t1_p[i]*100)+"%");
-                 buttonArray[i*3+8].setText(String.format("%.1f", t2_p[i]*100)+"%");
+                buttonArray[i*3+8].setText(String.format("%.1f", t2_p[i]*100)+"%");
             }
             else{
+                if (t1_s[i-2]>t2_s[i-2]) {
+                    buttonArray[i * 3 + 7].setBackgroundColor(Color.GREEN);
+                    buttonArray[i*3+8].setBackgroundColor(Color.RED);
+                }
+                else{
+                    buttonArray[i * 3 + 7].setBackgroundColor(Color.RED);
+                    buttonArray[i*3+8].setBackgroundColor(Color.GREEN);
+                }
                 buttonArray[i*3+7].setText(Integer.toString(t1_s[i-2]));
                 buttonArray[i*3+8].setText(Integer.toString(t2_s[i-2]));
             }
+        }
+        //Below is for turnovers where less turnovers is better
+        if (t1_s[6]<t2_s[6]) {
+            buttonArray[31].setBackgroundColor(Color.GREEN);
+            buttonArray[32].setBackgroundColor(Color.RED);
+        }
+        else{
+            buttonArray[31].setBackgroundColor(Color.RED);
+            buttonArray[32].setBackgroundColor(Color.GREEN);
         }
 
     }
