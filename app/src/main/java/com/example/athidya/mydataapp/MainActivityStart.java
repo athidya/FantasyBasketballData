@@ -64,8 +64,8 @@ public class MainActivityStart extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //login webview attempt
-                //Intent login = new Intent(getApplicationContext(), loginyahoo.class);
-                Intent login = new Intent(getApplicationContext(), SathActivity.class);
+                Intent login = new Intent(getApplicationContext(), loginyahoo.class);
+                //Intent login = new Intent(getApplicationContext(), SathActivity.class);
                 startActivity(login);
 
                 //authentication *working* for reference

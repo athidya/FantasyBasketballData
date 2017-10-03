@@ -22,17 +22,21 @@ public class PlayerInfo {
     turnovers;
     protected float fieldGoalPercentage,freeThrowPercentage;
 
+    public String teamName;
+    public int numOfGamesToPlay;
 
     public PlayerInfo(String firstName, String lastName)
     {
         this.firstName = firstName;
         this.lastName = lastName;
+        //this.teamName = teamName;
         this.fieldGoalMade=this.freeThrowMade =0;
         this.threePointsMade=this.points=0;
         this.rebounds=this.assists=0;
         this.steals=this.blocks=0;
         this.turnovers =0;
 
+        this.numOfGamesToPlay = 1;
     }
 
     //Prints current stats

@@ -70,10 +70,11 @@ public class SathActivity extends AppCompatActivity {
             buttonArray[i].setText(Integer.toString(i));
         }
 
+        //The different lists
         buttonArray[1].setText("WEEKLIST");
         buttonArray[2].setText("STATLIST");
-        buttonArray[4].setText("TEAMLIST");
-        buttonArray[5].setText("TEAMLIST");
+        buttonArray[4].setText("TEAMLIST1");
+        buttonArray[5].setText("TEAMLIST2");
 
         final String[] STATS = {
                 "FT%",
@@ -90,106 +91,11 @@ public class SathActivity extends AppCompatActivity {
             buttonArray[i*3 + 6].setText(STATS[i]);
         }
 
-        // WE NOW WILL CREATE TEMPORARY PLAYERS WITH RANDOM STATS PER CATEGORY EVENTUALLY REPLACED
-        // BY THE ACTUAL CODE
+        // WE NOW WILL CREATE TEMPORARY TEAM Names
 
-        PlayerInfo[] sathPlayers= new PlayerInfo[13];
-        sathPlayers[0] = new PlayerInfo("Lebron","James");
-        sathPlayers[1] = new PlayerInfo("Steph","Curry");
-        sathPlayers[2] = new PlayerInfo("CP","3");
-        sathPlayers[3] = new PlayerInfo("horford","al");
-        sathPlayers[4] = new PlayerInfo("boo","fun");
-        sathPlayers[5] = new PlayerInfo("cry","day");
-        sathPlayers[6] = new PlayerInfo("rivers","austin");
-        sathPlayers[7] = new PlayerInfo("cry","same");
-        sathPlayers[8] = new PlayerInfo("win","all");
-        sathPlayers[9] = new PlayerInfo("games","is the");
-        sathPlayers[10] = new PlayerInfo("goal","testing");
-        sathPlayers[11] = new PlayerInfo("popavich","lonzo");
-        sathPlayers[12] = new PlayerInfo("ball","test");
+        updateScreen();
 
-        PlayerInfo[] athidyaPlayers= new PlayerInfo[13];
-        athidyaPlayers[0] = new PlayerInfo("Lebron","James");
-        athidyaPlayers[1] = new PlayerInfo("Steph","Curry");
-        athidyaPlayers[2] = new PlayerInfo("CP","3");
-        athidyaPlayers[3] = new PlayerInfo("horford","al");
-        athidyaPlayers[4] = new PlayerInfo("boo","fun");
-        athidyaPlayers[5] = new PlayerInfo("cry","day");
-        athidyaPlayers[6] = new PlayerInfo("rivers","austin");
-        athidyaPlayers[7] = new PlayerInfo("cry","same");
-        athidyaPlayers[8] = new PlayerInfo("win","all");
-        athidyaPlayers[9] = new PlayerInfo("games","is the");
-        athidyaPlayers[10] = new PlayerInfo("goal","testing");
-        athidyaPlayers[11] = new PlayerInfo("popavich","lonzo");
-        athidyaPlayers[12] = new PlayerInfo("ball","test");
-
-        GMTeamInfo sathTeam = new GMTeamInfo("Sath's rookie team",sathPlayers);
-        GMTeamInfo athidyaTeam = new GMTeamInfo("Athidya's cool team",athidyaPlayers);
-
-        Random rand = new Random();
-
-        for (int i = 0; i < sathTeam.players.length; i++) {
-            sathTeam.players[i].generateRandomStat();
-            athidyaTeam.players[i].generateRandomStat();
-
-        }
-
-        //Above is just the creation of the random stats to random players. We have done the above
-        // for 2 players
-
-        //Here we will calculate the total of the players in each team and combine and then we will
-        //output the values on to the buttons.
-        sathTeam.CalculateTotal();
-        athidyaTeam.CalculateTotal();
-
-        //Sets the team names
-        buttonArray[4].setText(sathTeam.teamName);
-        buttonArray[5].setText(athidyaTeam.teamName);
-
-        //Sets each teams stat
-        float[] t1_p = sathTeam.TotalPercentage();
-        float[] t2_p = athidyaTeam.TotalPercentage();
-        int[] t1_s = sathTeam.TotalScore();
-        int[] t2_s = athidyaTeam.TotalScore();
-
-        //Puts in the score and compares
-        for (int i = 0; i < t1_p.length+t1_s.length; i++) {
-            if (i<2){
-                if (t1_p[i]>t2_p[i]) {
-                    buttonArray[i * 3 + 7].setBackgroundColor(Color.GREEN);
-                    buttonArray[i*3+8].setBackgroundColor(Color.RED);
-                }
-                else{
-                    buttonArray[i * 3 + 7].setBackgroundColor(Color.RED);
-                    buttonArray[i*3+8].setBackgroundColor(Color.GREEN);
-                }
-
-                buttonArray[i*3+7].setText(String.format("%.1f", t1_p[i]*100)+"%");
-                buttonArray[i*3+8].setText(String.format("%.1f", t2_p[i]*100)+"%");
-            }
-            else{
-                if (t1_s[i-2]>t2_s[i-2]) {
-                    buttonArray[i * 3 + 7].setBackgroundColor(Color.GREEN);
-                    buttonArray[i*3+8].setBackgroundColor(Color.RED);
-                }
-                else{
-                    buttonArray[i * 3 + 7].setBackgroundColor(Color.RED);
-                    buttonArray[i*3+8].setBackgroundColor(Color.GREEN);
-                }
-                buttonArray[i*3+7].setText(Integer.toString(t1_s[i-2]));
-                buttonArray[i*3+8].setText(Integer.toString(t2_s[i-2]));
-            }
-        }
-        //Below is for turnovers where less turnovers is better
-        if (t1_s[6]<t2_s[6]) {
-            buttonArray[31].setBackgroundColor(Color.GREEN);
-            buttonArray[32].setBackgroundColor(Color.RED);
-        }
-        else{
-            buttonArray[31].setBackgroundColor(Color.RED);
-            buttonArray[32].setBackgroundColor(Color.GREEN);
-        }
-
+        //Below we have event listeners for each button click
         //WEEKLIST button clicked
         buttonArray[1].setOnClickListener(new View.OnClickListener(){
             @Override
@@ -231,8 +137,6 @@ public class SathActivity extends AppCompatActivity {
             }
         });
 
-
-
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -242,13 +146,108 @@ public class SathActivity extends AppCompatActivity {
                 if (data.getStringExtra("WEEKLIST")!=null)
                     buttonArray[1].setText(data.getStringExtra("WEEKLIST"));
                 else if (data.getStringExtra("STATLIST")!=null)
-                    buttonArray[1].setText(data.getStringExtra("STATLIST"));
+                    buttonArray[2].setText(data.getStringExtra("STATLIST"));
                 else if (data.getStringExtra("TEAMLIST1")!=null)
-                    buttonArray[1].setText(data.getStringExtra("TEAMLIST1"));
+                    buttonArray[4].setText(data.getStringExtra("TEAMLIST1"));
                 else if (data.getStringExtra("TEAMLIST2")!=null)
-                    buttonArray[1].setText(data.getStringExtra("TEAMLIST2"));
+                    buttonArray[5].setText(data.getStringExtra("TEAMLIST2"));
+
+                updateScreen();
             }
         }
+    }
+
+    public void updateScreen(){
+
+        //We get 4 variables to play with essentially last 2 are the gms and 1 is the week for
+        //information for number of games played that week, and other is to choose a specific stat
+        // to use like last weeks or last months.
+
+        String teamA = buttonArray[4].getText().toString();
+        String teamB = buttonArray[5].getText().toString();
+        String week = buttonArray[1].getText().toString();
+        String statType = buttonArray[2].getText().toString();
+
+
+        GMTeamInfo firstTeam = new GMTeamInfo(teamA,getPlayerInfo(teamA));
+        GMTeamInfo secondTeam = new GMTeamInfo(teamB,getPlayerInfo(teamB));
+
+        //Here you would pull their average stats and put it into each player
+        //including number of games they would play this week
+        for (int i = 0; i < firstTeam.players.length; i++) {
+            firstTeam.players[i].generateRandomStat();
+            secondTeam.players[i].generateRandomStat();
+        }
+
+        //Here we will calculate the total of the players in each team and combine and then we will
+        //output the values on to the buttons.
+        firstTeam.CalculateTotal();
+        secondTeam.CalculateTotal();
+
+        //Sets each teams stat
+        float[] t1_p = firstTeam.TotalPercentage();
+        float[] t2_p = secondTeam.TotalPercentage();
+        int[] t1_s = firstTeam.TotalScore();
+        int[] t2_s = secondTeam.TotalScore();
+
+        //Puts in the score and compares visually
+        for (int i = 0; i < t1_p.length+t1_s.length; i++) {
+            if (i<2){
+                if (t1_p[i]>t2_p[i]) {
+                    buttonArray[i * 3 + 7].setBackgroundColor(Color.GREEN);
+                    buttonArray[i*3+8].setBackgroundColor(Color.RED);
+                }
+                else{
+                    buttonArray[i * 3 + 7].setBackgroundColor(Color.RED);
+                    buttonArray[i*3+8].setBackgroundColor(Color.GREEN);
+                }
+
+                buttonArray[i*3+7].setText(String.format("%.1f", t1_p[i]*100)+"%");
+                buttonArray[i*3+8].setText(String.format("%.1f", t2_p[i]*100)+"%");
+            }
+            else{
+                if (t1_s[i-2]>t2_s[i-2]) {
+                    buttonArray[i * 3 + 7].setBackgroundColor(Color.GREEN);
+                    buttonArray[i*3+8].setBackgroundColor(Color.RED);
+                }
+                else{
+                    buttonArray[i * 3 + 7].setBackgroundColor(Color.RED);
+                    buttonArray[i*3+8].setBackgroundColor(Color.GREEN);
+                }
+                buttonArray[i*3+7].setText(Integer.toString(t1_s[i-2]));
+                buttonArray[i*3+8].setText(Integer.toString(t2_s[i-2]));
+            }
+        }
+        //Below is for turnovers where less turnovers is better
+        if (t1_s[6]<t2_s[6]) {
+            buttonArray[31].setBackgroundColor(Color.GREEN);
+            buttonArray[32].setBackgroundColor(Color.RED);
+        }
+        else{
+            buttonArray[31].setBackgroundColor(Color.RED);
+            buttonArray[32].setBackgroundColor(Color.GREEN);
+        }
+
+    }
+
+    public PlayerInfo[] getPlayerInfo(String teamName){
+
+        PlayerInfo[] tempPlayers= new PlayerInfo[13];
+        tempPlayers[0] = new PlayerInfo("Lebron","James");
+        tempPlayers[1] = new PlayerInfo("Steph","Curry");
+        tempPlayers[2] = new PlayerInfo("CP","3");
+        tempPlayers[3] = new PlayerInfo("horford","al");
+        tempPlayers[4] = new PlayerInfo("boo","fun");
+        tempPlayers[5] = new PlayerInfo("cry","day");
+        tempPlayers[6] = new PlayerInfo("rivers","austin");
+        tempPlayers[7] = new PlayerInfo("cry","same");
+        tempPlayers[8] = new PlayerInfo("win","all");
+        tempPlayers[9] = new PlayerInfo("games","is the");
+        tempPlayers[10] = new PlayerInfo("goal","testing");
+        tempPlayers[11] = new PlayerInfo("popavich","lonzo");
+        tempPlayers[12] = new PlayerInfo("ball","test");
+
+        return tempPlayers;
     }
 
 }

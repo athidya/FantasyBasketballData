@@ -35,19 +35,24 @@ public class GMTeamInfo {
         reboundsTotal=assistsTotal=0;
         stealsTotal=blocksTotal=0;
         turnoversTotal=0;
+        int numOfGamesToPlay =0;
 
         for (int i = 0; i < players.length; i++) {
-            fieldGoalAttemptsTotal+= players[i].fieldGoalAttempts;
-            fieldGoalMadeTotal+= players[i].fieldGoalMade;
-            freeThrowAttemptsTotal+= players[i].freeThrowAttempts;
-            freeThrowMadeTotal+= players[i].freeThrowMade;
-            threePointsMadeTotal+= players[i].threePointsMade;
-            pointsTotal+= players[i].points;
-            reboundsTotal+= players[i].rebounds;
-            assistsTotal+= players[i].assists;
-            stealsTotal+= players[i].steals;
-            blocksTotal+= players[i].blocks;
-            turnoversTotal+= players[i].turnovers;
+
+            numOfGamesToPlay = players[i].numOfGamesToPlay;
+
+            fieldGoalAttemptsTotal+= players[i].fieldGoalAttempts*numOfGamesToPlay;
+            fieldGoalMadeTotal+= players[i].fieldGoalMade*numOfGamesToPlay;
+            freeThrowAttemptsTotal+= players[i].freeThrowAttempts*numOfGamesToPlay;
+            freeThrowMadeTotal+= players[i].freeThrowMade*numOfGamesToPlay;
+            threePointsMadeTotal+= players[i].threePointsMade*numOfGamesToPlay;
+            pointsTotal+= players[i].points*numOfGamesToPlay;
+            reboundsTotal+= players[i].rebounds*numOfGamesToPlay;
+            assistsTotal+= players[i].assists*numOfGamesToPlay;
+            stealsTotal+= players[i].steals*numOfGamesToPlay;
+            blocksTotal+= players[i].blocks*numOfGamesToPlay;
+            turnoversTotal+= players[i].turnovers*numOfGamesToPlay;
+
         }
 
         fieldGoalPercentageTotal=(float)fieldGoalMadeTotal/fieldGoalAttemptsTotal;
