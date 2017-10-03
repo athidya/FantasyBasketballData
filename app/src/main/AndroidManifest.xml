@@ -43,7 +43,8 @@
             android:name=".code"
             android:label="@string/title_activity_code"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".SathActivity"></activity>
+        <activity android:name=".SathActivity" />
+        <activity android:name=".SelectionActivity"></activity>
     </application>
 
 </manifest>

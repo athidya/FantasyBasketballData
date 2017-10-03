@@ -1,8 +1,11 @@
 package com.example.athidya.mydataapp;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -13,18 +16,18 @@ import java.util.Random;
 
 public class SathActivity extends AppCompatActivity {
 
-    private ListView mListView;
+    final static int REQ_CODE = 1;
 
+    //HERE WE INITIALLIZE THE BASIC FRAME WORK
+    final int GRID_ROWS = 11;
+    final int GRID_COLOUMNS = 3;
+    final int TOTAL_BUTTONS = GRID_ROWS * GRID_COLOUMNS;
+    final Button[] buttonArray = new Button[TOTAL_BUTTONS];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sath);
 
-        //HERE WE INITIALLIZE THE BASIC FRAME WORK
-        final int GRID_ROWS = 11;
-        final int GRID_COLOUMNS = 3;
-        final int TOTAL_BUTTONS = GRID_ROWS * GRID_COLOUMNS;
-        final Button[] buttonArray = new Button[TOTAL_BUTTONS];
         final int[] BUTTON_IDS = {
                 R.id.button_1_1,
                 R.id.button_1_2,
@@ -67,10 +70,10 @@ public class SathActivity extends AppCompatActivity {
             buttonArray[i].setText(Integer.toString(i));
         }
 
-        buttonArray[1].setText("WEEKXX");
-        buttonArray[2].setText("STATSTYPE");
-        buttonArray[4].setText("GM-A");
-        buttonArray[5].setText("GM-B");
+        buttonArray[1].setText("WEEKLIST");
+        buttonArray[2].setText("STATLIST");
+        buttonArray[4].setText("TEAMLIST");
+        buttonArray[5].setText("TEAMLIST");
 
         final String[] STATS = {
                 "FT%",
@@ -187,7 +190,65 @@ public class SathActivity extends AppCompatActivity {
             buttonArray[32].setBackgroundColor(Color.GREEN);
         }
 
+        //WEEKLIST button clicked
+        buttonArray[1].setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+
+                Intent login = new Intent(getApplicationContext(), SelectionActivity.class);
+                login.putExtra("message", "WEEKLIST");
+                startActivityForResult(login,REQ_CODE);
+            }
+        });
+        //STATLIST button clicked
+        buttonArray[2].setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+
+                Intent login = new Intent(getApplicationContext(), SelectionActivity.class);
+                login.putExtra("message", "STATLIST");
+                startActivityForResult(login,REQ_CODE);
+            }
+        });
+        //TEAMLIST button clicked
+        buttonArray[4].setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+
+                Intent login = new Intent(getApplicationContext(), SelectionActivity.class);
+                login.putExtra("message", "TEAMLIST1");
+                startActivityForResult(login,REQ_CODE);
+            }
+        });
+        //TEAMLIST button clicked
+        buttonArray[5].setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+
+                Intent login = new Intent(getApplicationContext(), SelectionActivity.class);
+                login.putExtra("message", "TEAMLIST2");
+                startActivityForResult(login,REQ_CODE);
+            }
+        });
+
+
+
     }
 
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if(resultCode == RESULT_OK) {
+                if (data.getStringExtra("WEEKLIST")!=null)
+                    buttonArray[1].setText(data.getStringExtra("WEEKLIST"));
+                else if (data.getStringExtra("STATLIST")!=null)
+                    buttonArray[1].setText(data.getStringExtra("STATLIST"));
+                else if (data.getStringExtra("TEAMLIST1")!=null)
+                    buttonArray[1].setText(data.getStringExtra("TEAMLIST1"));
+                else if (data.getStringExtra("TEAMLIST2")!=null)
+                    buttonArray[1].setText(data.getStringExtra("TEAMLIST2"));
+            }
+        }
+    }
 
 }
