@@ -31,4 +31,10 @@ dependencies {
     compile 'com.google.android.gms:play-services-appindexing:8.4.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha9'
     testCompile 'junit:junit:4.12'
+    compile files('libs/oauth2-oidc-sdk-4.16.1.jar')
+    compile files('libs/oauth2-oidc-sdk-4.16.1-javadoc.jar')
+    compile files('libs/oauth2-oidc-sdk-4.16.1-sources.jar')
+    compile files('libs/nimbus-jose-jwt-4.33-javadoc.jar')
+    compile files('libs/nimbus-jose-jwt-4.33-sources.jar')
+    compile files('libs/nimbus-jose-jwt-4.33.jar')
 }

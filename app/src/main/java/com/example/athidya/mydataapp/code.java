@@ -1,17 +1,14 @@
 package com.example.athidya.mydataapp;
 
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputFilter;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,20 +20,21 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-
-import org.json.JSONArray;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.ECDSASigner;
+import com.nimbusds.jose.crypto.ECDSAVerifier;
+import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.Key;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 
-import static android.R.attr.prompt;
-import static android.R.attr.tag;
 import static com.example.athidya.mydataapp.R.id.textView;
 
 public class code extends AppCompatActivity {
@@ -45,8 +43,11 @@ public class code extends AppCompatActivity {
     String code = "";
     String CONSUMER_KEY = "dj0yJmk9aFl3bUFQTmdUUzdFJmQ9WVdrOWFGaHRObTlzTmpJbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD02MA--";
     String CONSUMER_SECRET = "e11fcfa6ffaa42d031421af91dbbd1ee2f7ffb41";
-    String access_token = ""; String id_token = ""; String expires_in = ""; String token_type = ""; String refresh_token=""; String xoauth_yahoo_guid="";
-    String jose_header = ""; String payload = ""; String signature = "";
+    String access_token, id_token, expires_in, token_type, refresh_token, xoauth_yahoo_guid = "";
+    String jose_header, payload, signature = "";
+    String JHalg, JHkid, respalg1, respalg2, respkid1, respkid2, thealg, thekid = "";
+    String[] KeyObj;
+
 
     @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
     @Override
@@ -86,9 +87,38 @@ public class code extends AppCompatActivity {
         valButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                validation(queue); //takes given token and validates it
+                validationReq(queue); //takes given token and validates it
             }
         });
+
+       /* final Button inforeq = (Button) findViewById(R.id.button3);
+        inforeq.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+                String url ="https://query.yahooapis.com/v1/yql" +
+                        "?q=select%20*%20from%20fantasysports." +
+                        "players%20where%20player_key%3D'238.p.6619'&diagnostics=true";
+
+                // Request a string response from the provided URL.
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                // Display the first 500 characters of the response string.
+                                Log.d("Data call back", response);
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("data error","That didn't work!");
+                        error.printStackTrace();
+                    }
+                });
+                // Add the request to the RequestQueue.
+                queue.add(stringRequest);
+            }
+        });*/
     }
 
     public void tokenReq(final RequestQueue queue) {
@@ -133,27 +163,30 @@ public class code extends AppCompatActivity {
         queue.add(tokenreq); //start request
     }
 
+
     /*
     separates values from response given by our request, assigns them to local variables
     also decodes id_token values from base64 encoding
      */
     public void decodeResponse(String Tokenresponse) {
         String[] response = Tokenresponse.split(",");
-        access_token = getres(response[0]);
-        refresh_token = getres(response[1]);
-        expires_in = getres(response[2]);
-        token_type = getres(response[3]);
-        xoauth_yahoo_guid = getres(response[4]);
-        id_token = getres(response[5]);
+        access_token = clean(response[0]);
+        refresh_token = clean(response[1]);
+        expires_in = clean(response[2]);
+        token_type = clean(response[3]);
+        xoauth_yahoo_guid = clean(response[4]);
+        id_token = clean(response[5]);
         //handle id_token params and decode them from base64 encoding
         String[] temp = id_token.split(Pattern.quote("."));
         byte[] jose = Base64.decode(temp[0], Base64.DEFAULT);
         try {
             jose_header = new String(jose, "UTF-8");
+            String[] subtemp = jose_header.split(Pattern.quote(","));
+            JHalg = clean(subtemp[0]);
+            JHkid = clean(subtemp[1]);
         } catch(UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        Log.d("paybefore",temp[1]);
         byte[] pay = Base64.decode(temp[1], Base64.DEFAULT);
         try {
             payload = new String(pay, "UTF-8");
@@ -162,25 +195,26 @@ public class code extends AppCompatActivity {
         }
         temp[2] = temp[2].replaceAll("\\}", "");
         signature = temp[2];
-        Log.d("payafter", payload);
-
     }
+
+
+
     //repetitive splitting and assignment part of decodeResponse
-    public String getres (String rep) {
+    public String clean(String rep) {
         String[] temp = rep.split(":");
         return temp[1].replace("\"", "");
     }
 
-    //used to validate id_token *work in progress*
-    public void validation(RequestQueue queue) {
+    //request for getting the public keys
+    public void validationReq(RequestQueue queue) {
         final TextView prompt = (TextView) findViewById(textView);
         String valUrl = "https://login.yahoo.com/openid/v1/certs";
         StringRequest valReq = new StringRequest(Request.Method.GET, valUrl,
                 new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d("Response", response);
-                prompt.setText(response);
+                Log.d("Validation Response", response);
+                validate(response);
                 }
             }, new Response.ErrorListener() {
                 @Override
@@ -189,5 +223,37 @@ public class code extends AppCompatActivity {
                 }
         });
         queue.add(valReq);
+    }
+    //checking for which public key corresponds to our key given by jose_header
+    public void validate(String response) {
+        String[] temp = response.split("\\},\\{");
+        temp[0] = temp[0].replace("\"keys\":[\\{", "");
+        String[] Obj1 = temp[0].split(",");
+        String[] Obj2 = temp[1].split(",");
+        respalg1 = clean(Obj1[1]);
+        respalg2 = clean(Obj2[1]);
+        //assignment the matching object to KeyObj for later comparison
+        if (respalg1.equals(JHalg)) {
+            KeyObj = Obj1;
+            Log.d("compare", "Obj1");
+        }
+        else if (respalg2.equals(JHalg)) {
+            KeyObj = Obj2;
+            Log.d("compare", "Obj2");
+        }
+        else {Log.d("Error", "error in alg comparison");}
+
+        //checking for cryptographic algo type to decode x & y using
+        thealg = clean(KeyObj[1]);
+        if(thealg.equals("ES256")) {
+            //use ES256 crypt key
+        }
+        else if (thealg.equals("RS256")) {
+            //use RS256 crypt key
+        }
+    }
+    public boolean validateSignature(String x, String y) throws Throwable{
+        //JWSVerifier verifier = new ECDSAVerifier(new BigInteger(Base64.decode(x, Base64.DEFAULT)), new BigInteger(Base64.decode(y, Base64.DEFAULT)));
+        return true;
     }
 }
