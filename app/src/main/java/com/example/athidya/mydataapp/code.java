@@ -48,8 +48,9 @@ public class code extends AppCompatActivity {
 
     //initiators for params needed in HTTP POST and GET requests
     String code = "";
-    String CONSUMER_KEY = "";
-    String CONSUMER_SECRET = "";
+    String CONSUMER_KEY = "dj0yJmk9OVRsVmpac0lNVW5CJmQ9WVdrOVZrOW1hMjgyTkhNbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD03Yw--";
+    String CONSUMER_SECRET = "1fb02c80bc151350fa4c5bd523b185f2c296cada";
+    String ENCODED_ID = "ZGoweUptazlPVlJzVm1wYWMwbE5WVzVDSm1ROVdWZHJPVlpyT1cxaE1qZ3lUa2hOYldOSGJ6bE5RUzB0Sm5NOVkyOXVjM1Z0WlhKelpXTnlaWFFtZUQwM1l3LS06MWZiMDJjODBiYzE1MTM1MGZhNGM1YmQ1MjNiMTg1ZjJjMjk2Y2FkYQ==";
     String access_token, id_token, expires_in, token_type, refresh_token, xoauth_yahoo_guid = "";
     String jose_header, payload, signature = "";
     String JHalg, JHkid, respalg1, respalg2, respkid1, respkid2, thealg, thekid = "";
@@ -103,8 +104,7 @@ public class code extends AppCompatActivity {
         inforeq.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                String url ="https://query.yahooapis.com/v1/yql?q=select%20*%20from%20fantasy" +
-                        "sports.players.ownership%20where%20player_key%3D%27238.p.6619%27%20and%20league_key%3D%27238.l.627060%27&diagnostics=true";
+                String url ="https://query.yahooapis.com/v1/yql?q=select%20*%20from%20fantasysports.draftresults%20where%20league_key%3D%27238.l.627060%27&diagnostics=true";
                 // Request a string response from the provided URL.
                 StringRequest jsonReq = new StringRequest(Request.Method.GET, url,
                         new Response.Listener<String>() {
@@ -176,7 +176,7 @@ public class code extends AppCompatActivity {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
                 headers.put("Content-Type", "application/x-www-form-urlencoded");
-                headers.put("Authorization", "Basic " + "");
+                headers.put("Authorization", "Basic " + ENCODED_ID);
                 return headers;
             }
         };
