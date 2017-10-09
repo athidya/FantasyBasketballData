@@ -20,19 +20,26 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
-import com.nimbusds.oauth2.sdk.auth.JWTAuthentication;
+import com.nimbusds.jose.jwk.ECKey;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.Key;
+import java.security.interfaces.ECPublicKey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.security.*;
 
 
 import static com.example.athidya.mydataapp.R.id.textView;
@@ -41,12 +48,13 @@ public class code extends AppCompatActivity {
 
     //initiators for params needed in HTTP POST and GET requests
     String code = "";
-    String CONSUMER_KEY = "dj0yJmk9aFl3bUFQTmdUUzdFJmQ9WVdrOWFGaHRObTlzTmpJbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD02MA--";
-    String CONSUMER_SECRET = "e11fcfa6ffaa42d031421af91dbbd1ee2f7ffb41";
+    String CONSUMER_KEY = "";
+    String CONSUMER_SECRET = "";
     String access_token, id_token, expires_in, token_type, refresh_token, xoauth_yahoo_guid = "";
     String jose_header, payload, signature = "";
     String JHalg, JHkid, respalg1, respalg2, respkid1, respkid2, thealg, thekid = "";
     String[] KeyObj;
+    String xstr, ystr = "";
 
 
     @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
@@ -91,22 +99,19 @@ public class code extends AppCompatActivity {
             }
         });
 
-       /* final Button inforeq = (Button) findViewById(R.id.button3);
+        final Button inforeq = (Button) findViewById(R.id.button3);
         inforeq.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-                String url ="https://query.yahooapis.com/v1/yql" +
-                        "?q=select%20*%20from%20fantasysports." +
-                        "players%20where%20player_key%3D'238.p.6619'&diagnostics=true";
-
+                String url ="https://query.yahooapis.com/v1/yql?q=select%20*%20from%20fantasy" +
+                        "sports.players.ownership%20where%20player_key%3D%27238.p.6619%27%20and%20league_key%3D%27238.l.627060%27&diagnostics=true";
                 // Request a string response from the provided URL.
-                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                StringRequest jsonReq = new StringRequest(Request.Method.GET, url,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
                                 // Display the first 500 characters of the response string.
-                                Log.d("Data call back", response);
+                                Log.d("Data call back", response.toString());
                             }
                         }, new Response.ErrorListener() {
                     @Override
@@ -114,11 +119,26 @@ public class code extends AppCompatActivity {
                         Log.d("data error","That didn't work!");
                         error.printStackTrace();
                     }
-                });
+                }){/*
+                    @Override
+                    protected Map<String, String> getParams(){
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("client_id", CONSUMER_KEY);
+                        params.put("client_secret", CONSUMER_SECRET);
+                        return params;
+                    }*/
+                    //parameters for request header
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        HashMap<String, String> headers = new HashMap<String, String>();
+                        headers.put("Authorization", "Bearer " + access_token);
+                        return headers;
+                    }
+                };
                 // Add the request to the RequestQueue.
-                queue.add(stringRequest);
+                queue.add(jsonReq);
             }
-        });*/
+        });
     }
 
     public void tokenReq(final RequestQueue queue) {
@@ -148,7 +168,7 @@ public class code extends AppCompatActivity {
                 params.put("redirect_uri", "oob");
                 params.put("code", code);
                 params.put("client_id", CONSUMER_KEY);
-                params.put("client_secrect", CONSUMER_SECRET);
+                params.put("client_secret", CONSUMER_SECRET);
                 return params;
             }
             //parameters for request header
@@ -156,7 +176,7 @@ public class code extends AppCompatActivity {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
                 headers.put("Content-Type", "application/x-www-form-urlencoded");
-                headers.put("Authorization", "Basic " + "ZGoweUptazlhRmwzYlVGUVRtZFVVemRGSm1ROVdWZHJPV0ZHYUhST2JUbHpUbXBKYldOSGJ6bE5RUzB0Sm5NOVkyOXVjM1Z0WlhKelpXTnlaWFFtZUQwMk1BLS06ZTExZmNmYTZmZmFhNDJkMDMxNDIxYWY5MWRiYmQxZWUyZjdmZmI0MQ==");
+                headers.put("Authorization", "Basic " + "");
                 return headers;
             }
         };
@@ -171,6 +191,7 @@ public class code extends AppCompatActivity {
     public void decodeResponse(String Tokenresponse) {
         String[] response = Tokenresponse.split(",");
         access_token = clean(response[0]);
+        Log.d("access_token", access_token);
         refresh_token = clean(response[1]);
         expires_in = clean(response[2]);
         token_type = clean(response[3]);
@@ -253,7 +274,19 @@ public class code extends AppCompatActivity {
         }
     }
     public boolean validateSignature(String x, String y) throws Throwable{
-        //JWSVerifier verifier = new ECDSAVerifier(new BigInteger(Base64.decode(x, Base64.DEFAULT)), new BigInteger(Base64.decode(y, Base64.DEFAULT)));
+        byte[] xbyte = Base64.decode(x, Base64.DEFAULT);
+        try {
+            xstr = new String(xbyte, "UTF-8");
+        }catch(UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        byte[] ybyte = Base64.decode(x, Base64.DEFAULT);
+        try {
+            ystr = new String(ybyte, "UTF-8");
+        }catch(UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
         return true;
     }
 }

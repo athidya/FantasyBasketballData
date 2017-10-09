@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class loginyahoo extends AppCompatActivity {
 
-    String CONSUMER_KEY = "dj0yJmk9aFl3bUFQTmdUUzdFJmQ9WVdrOWFGaHRObTlzTmpJbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD02MA--";
+    String CONSUMER_KEY = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +41,7 @@ public class loginyahoo extends AppCompatActivity {
         String url = "https://api.login.yahoo.com/oauth2/request_auth?" +
                 "client_id=" + CONSUMER_KEY +
                 "&response_type=code" + "&redirect_uri=oob" +
-                "&scope=openid%20fspt-r" +
+                "&scope=openid%20fspt-w" +
                 "&nonce=" + createNonce();
         webview.loadUrl(url);
 
