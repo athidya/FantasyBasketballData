@@ -32,11 +32,18 @@ import com.nimbusds.jose.jwk.ECKey;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.interfaces.ECPublicKey;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.security.*;
@@ -56,7 +63,6 @@ public class code extends AppCompatActivity {
     String JHalg, JHkid, respalg1, respalg2, respkid1, respkid2, thealg, thekid = "";
     String[] KeyObj;
     String xstr, ystr = "";
-
 
     @RequiresApi(api = Build.VERSION_CODES.GINGERBREAD)
     @Override
@@ -113,7 +119,18 @@ public class code extends AppCompatActivity {
                             @Override
                             public void onResponse(String response) {
                                 // Display the first 500 characters of the response string.
-                                Log.d("Data call back", response.toString());
+                                List<String> printlog = new ArrayList<String>();
+                                int index = 0;
+                                while (index < response.length()) {
+                                    printlog.add(response.substring(index, Math.min(index + 2000, response.length())));
+                                    index +=2000;
+                                }
+                                for (int i = 0; i<printlog.size(); i++) {
+                                    Log.d("data call", printlog.get(i));
+                                }
+                                //Log.d("Data call back", response);
+
+
                             }
                         }, new Response.ErrorListener() {
                     @Override
