@@ -81,6 +81,7 @@ public class code extends AppCompatActivity {
         final EditText entercode = (EditText) findViewById(R.id.editText);
         entercode.setFilters(new InputFilter[] {new InputFilter.LengthFilter(7)});
         final RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+        final EditText urlreader = (EditText) findViewById(R.id.editText2);
 
         //NEXT button that initiates trying to get token from yahoo given the code *working*
         nextButton.setOnClickListener(new View.OnClickListener(){
@@ -104,7 +105,8 @@ public class code extends AppCompatActivity {
         inforeq.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                String url ="https://query.yahooapis.com/v1/yql?q=select%20*%20from%20fantasysports.draftresults%20where%20league_key%3D%27238.l.627060%27&diagnostics=true";
+                String url = urlreader.getText().toString();
+                //String url ="https://query.yahooapis.com/v1/yql?q=select%20*%20from%20fantasysports.players%20where%20player_key%3D%27238.p.6619%27&diagnostics=true";
                 // Request a string response from the provided URL.
                 StringRequest jsonReq = new StringRequest(Request.Method.GET, url,
                         new Response.Listener<String>() {
