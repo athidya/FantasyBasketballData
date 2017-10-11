@@ -10,39 +10,9 @@ public class SelectionActivity extends AppCompatActivity implements
         View.OnClickListener {
 
     //The various modes
-    String[] WEEKLIST = {"WEEK1",
-            "WEEK2",
-            "WEEK3",
-            "WEEK4",
-            "WEEK5",
-            "WEEK6",
-            "WEEK7",
-            "WEEK8",
-            "WEEK9",
-            "WEEK10",
-            "WEEK11",
-            "WEEK12",
-            "WEEK13",
-            "WEEK14",
-            "WEEK15" };
-    String[] STATLIST = {"LAST WEEKS",
-    "LAST MONTH","LAST SEASON"
-            ,"",""
-            ,"",""
-            ,"",""
-            ,"",""
-            ,"",""
-            ,"",""};
-
-    String[] TEAMLIST = {"SATH'S ROOKIE","ATHIDYA'S COOL"
-            ,"",""
-            ,"",""
-            ,"",""
-            ,"",""
-            ,"",""
-            ,"",""
-            ,"",""
-            ,""};
+    String[] WEEKLIST = new String[15];
+    String[] STATLIST = new String[15];
+    String[] TEAMLIST = new String[15];
 
     String message ;
 
@@ -54,6 +24,20 @@ public class SelectionActivity extends AppCompatActivity implements
 
         Bundle bundle = getIntent().getExtras();
         message = bundle.getString("message");
+
+        if (message.equals("WEEKLIST") ) {
+            WEEKLIST = getWeeksInfo();
+        }
+        else if( message.equals("STATLIST")){
+            STATLIST = getStatTypes();
+        }
+        else if(message.equals("TEAMLIST1")){
+            TEAMLIST=getTeamList();
+        }
+        else if(message.equals("TEAMLIST2")){
+            TEAMLIST=getTeamList();
+
+        }
 
         //HERE WE INITIALLIZE THE BASIC FRAME WORK
         final int GRID_ROWS = 5;
@@ -120,4 +104,53 @@ public class SelectionActivity extends AppCompatActivity implements
         setResult(RESULT_OK, intent);
         this.finish();
     }
+
+    //TODO
+    public String[] getWeeksInfo(){
+
+        String[] temp = {"WEEK1",
+                "WEEK2",
+                "WEEK3",
+                "WEEK4",
+                "WEEK5",
+                "WEEK6",
+                "WEEK7",
+                "WEEK8",
+                "WEEK9",
+                "WEEK10",
+                "WEEK11",
+                "WEEK12",
+                "WEEK13",
+                "WEEK14",
+                "WEEK15" };
+
+        return temp;
+    }
+
+    //TODO
+    public String[] getStatTypes(){
+        String[] temp = {"LAST WEEKS",
+                "LAST MONTH","LAST SEASON"
+                ,"",""
+                ,"",""
+                ,"",""
+                ,"",""
+                ,"",""
+                ,"",""};
+        return temp;
+    }
+
+    //TODO
+    public String[] getTeamList(){
+        String[] temp = {"LAST WEEKS",
+                "LAST MONTH","LAST SEASON"
+                ,"",""
+                ,"",""
+                ,"",""
+                ,"",""
+                ,"",""
+                ,"",""};
+        return temp;
+    }
+
 }

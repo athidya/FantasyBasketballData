@@ -35,8 +35,8 @@ public class MainActivityStart extends AppCompatActivity {
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
 
-    String CONSUMER_KEY = "";
-    String CONSUMER_SECRET = "";
+    String CONSUMER_KEY = "dj0yJmk9OVRsVmpac0lNVW5CJmQ9WVdrOVZrOW1hMjgyTkhNbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD03Yw--";
+    String CONSUMER_SECRET = "1fb02c80bc151350fa4c5bd523b185f2c296cada";
     private String requestToken;
     private String accessToken;
     private String currentNonce;
@@ -64,8 +64,8 @@ public class MainActivityStart extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //login webview attempt
-                Intent login = new Intent(getApplicationContext(), loginyahoo.class);
-                //Intent login = new Intent(getApplicationContext(), SathActivity.class);
+                //Intent login = new Intent(getApplicationContext(), loginyahoo.class);
+                Intent login = new Intent(getApplicationContext(), SathActivity.class);
                 startActivity(login);
 
                 //authentication *working* for reference

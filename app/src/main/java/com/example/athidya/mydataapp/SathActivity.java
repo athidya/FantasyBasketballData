@@ -67,7 +67,7 @@ public class SathActivity extends AppCompatActivity {
         for (int i = 0; i < TOTAL_BUTTONS; i++) {
             buttonArray[i] = (Button) findViewById(BUTTON_IDS[i]);
             buttonArray[i].setTextSize(12);
-            buttonArray[i].setText(Integer.toString(i));
+            //buttonArray[i].setText(Integer.toString(i));
         }
 
         //The different lists
@@ -116,7 +116,7 @@ public class SathActivity extends AppCompatActivity {
                 startActivityForResult(login,REQ_CODE);
             }
         });
-        //TEAMLIST button clicked
+        //TEAMLIST1 button clicked
         buttonArray[4].setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -126,7 +126,7 @@ public class SathActivity extends AppCompatActivity {
                 startActivityForResult(login,REQ_CODE);
             }
         });
-        //TEAMLIST button clicked
+        //TEAMLIST2 button clicked
         buttonArray[5].setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -151,7 +151,6 @@ public class SathActivity extends AppCompatActivity {
                     buttonArray[4].setText(data.getStringExtra("TEAMLIST1"));
                 else if (data.getStringExtra("TEAMLIST2")!=null)
                     buttonArray[5].setText(data.getStringExtra("TEAMLIST2"));
-
                 updateScreen();
             }
         }
