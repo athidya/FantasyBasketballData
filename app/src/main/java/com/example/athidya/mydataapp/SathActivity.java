@@ -233,6 +233,7 @@ public class SathActivity extends AppCompatActivity {
     public PlayerInfo[] getPlayerInfo(String teamName){
 
         PlayerInfo[] tempPlayers= new PlayerInfo[13];
+        /*
         tempPlayers[0] = new PlayerInfo("Lebron","James");
         tempPlayers[1] = new PlayerInfo("Steph","Curry");
         tempPlayers[2] = new PlayerInfo("CP","3");
@@ -245,7 +246,7 @@ public class SathActivity extends AppCompatActivity {
         tempPlayers[9] = new PlayerInfo("games","is the");
         tempPlayers[10] = new PlayerInfo("goal","testing");
         tempPlayers[11] = new PlayerInfo("popavich","lonzo");
-        tempPlayers[12] = new PlayerInfo("ball","test");
+        tempPlayers[12] = new PlayerInfo("ball","test");*/
 
         return tempPlayers;
     }

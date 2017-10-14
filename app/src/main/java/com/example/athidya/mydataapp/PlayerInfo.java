@@ -9,8 +9,10 @@ import java.util.Random;
 public class PlayerInfo {
 
     public Random rand = new Random();
+    private String playerid;
     private String firstName;
     private String lastName;
+    private String[] stats = new String[28];
     protected int fieldGoalAttempts,fieldGoalMade,
     freeThrowAttempts,freeThrowMade,
     threePointsMade,
@@ -25,8 +27,9 @@ public class PlayerInfo {
     public String teamName;
     public int numOfGamesToPlay;
 
-    public PlayerInfo(String firstName, String lastName)
+    public PlayerInfo(String playerid, String firstName, String lastName)
     {
+        this.playerid = playerid;
         this.firstName = firstName;
         this.lastName = lastName;
         //this.teamName = teamName;
@@ -35,7 +38,6 @@ public class PlayerInfo {
         this.rebounds=this.assists=0;
         this.steals=this.blocks=0;
         this.turnovers =0;
-
         this.numOfGamesToPlay = 1;
     }
 
@@ -72,4 +74,8 @@ public class PlayerInfo {
         turnovers = rand.nextInt(50) + 1;
     }
 
+    public String toString() {
+        String player = "Player ID: " + playerid + ", First Name: " + firstName + ", Last Name: " + lastName;
+        return player;
+    }
 }
