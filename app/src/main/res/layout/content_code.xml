@@ -54,7 +54,7 @@
         android:layout_alignParentStart="true" />
 
     <Button
-        android:text="Validation"
+        android:text="see stats"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/button2"

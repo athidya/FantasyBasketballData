@@ -1,10 +1,9 @@
 package com.example.athidya.mydataapp;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputFilter;
@@ -20,33 +19,15 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.ECDSASigner;
-import com.nimbusds.jose.crypto.ECDSAVerifier;
-import com.nimbusds.jose.jwk.ECKey;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
-import java.security.Key;
-import java.security.interfaces.ECPublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.security.*;
 
 
 import static com.example.athidya.mydataapp.R.id.textView;
@@ -72,22 +53,13 @@ public class code extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        final Button nextButton = (Button) findViewById(R.id.button7);
-
         //editable text field for user to input given code & limited to 7 characters b/c code length is always the same
         final EditText entercode = (EditText) findViewById(R.id.editText);
         entercode.setFilters(new InputFilter[] {new InputFilter.LengthFilter(7)});
+        final Button nextButton = (Button) findViewById(R.id.button7);
+
+
         final RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        final EditText urlreader = (EditText) findViewById(R.id.editText2);
 
         //NEXT button that initiates trying to get token from yahoo given the code *working*
         nextButton.setOnClickListener(new View.OnClickListener(){
@@ -95,7 +67,7 @@ public class code extends AppCompatActivity {
             public void onClick(View v) {
                 //login webview attempt
                 code = entercode.getText().toString(); //reads code entered in by the user to use for validation
-                tokenReq(queue); //initiates token request using given code
+                callRequest(queue); //initiates token request using given code
             }
         });
 
@@ -103,22 +75,25 @@ public class code extends AppCompatActivity {
         valButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                validationReq(queue); //takes given token and validates it
+                Intent statview = new Intent(getApplicationContext(), StatViewerActivity.class);
+                statview.putExtra("access_token", access_token);
+                startActivity(statview);
             }
         });
 
-        final Button inforeq = (Button) findViewById(R.id.button3);
-        inforeq.setOnClickListener(new View.OnClickListener(){
+        final Button newurl = (Button) findViewById(R.id.button3);
+        final EditText urlreader = (EditText) findViewById(R.id.editText2);
+
+        newurl.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                String url = urlreader.getText().toString();
-                //String url ="https://query.yahooapis.com/v1/yql?q=select%20*%20from%20fantasysports.players%20where%20player_key%3D%27238.p.6619%27&diagnostics=true";
+                String urlquery = urlreader.getText().toString();
                 // Request a string response from the provided URL.
-                StringRequest jsonReq = new StringRequest(Request.Method.GET, url,
+                StringRequest jsonReq = new StringRequest(Request.Method.GET, urlquery,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                // Display the first 500 characters of the response string.
+                                // displays all recieved information correctly in the Log without cutoff
                                 List<String> printlog = new ArrayList<String>();
                                 int index = 0;
                                 while (index < response.length()) {
@@ -138,15 +113,7 @@ public class code extends AppCompatActivity {
                         Log.d("data error","That didn't work!");
                         error.printStackTrace();
                     }
-                }){/*
-                    @Override
-                    protected Map<String, String> getParams(){
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("client_id", CONSUMER_KEY);
-                        params.put("client_secret", CONSUMER_SECRET);
-                        return params;
-                    }*/
-                    //parameters for request header
+                }){
                     @Override
                     public Map<String, String> getHeaders() throws AuthFailureError {
                         HashMap<String, String> headers = new HashMap<String, String>();
@@ -160,7 +127,7 @@ public class code extends AppCompatActivity {
         });
     }
 
-    public void tokenReq(final RequestQueue queue) {
+    public void callRequest(final RequestQueue queue) {
         String url = "https://api.login.yahoo.com/oauth2/get_token";
         final TextView prompt = (TextView) findViewById(textView);
 
@@ -237,16 +204,15 @@ public class code extends AppCompatActivity {
         signature = temp[2];
     }
 
-
-
     //repetitive splitting and assignment part of decodeResponse
     public String clean(String rep) {
         String[] temp = rep.split(":");
         return temp[1].replace("\"", "");
     }
 
+    // not being used, but here in case we continue it later
     //request for getting the public keys
-    public void validationReq(RequestQueue queue) {
+    /*public void validationReq(RequestQueue queue) {
         final TextView prompt = (TextView) findViewById(textView);
         String valUrl = "https://login.yahoo.com/openid/v1/certs";
         StringRequest valReq = new StringRequest(Request.Method.GET, valUrl,
@@ -305,7 +271,6 @@ public class code extends AppCompatActivity {
         }catch(UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-
         return true;
-    }
+    }*/
 }

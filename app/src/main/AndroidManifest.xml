@@ -44,7 +44,11 @@
             android:label="@string/title_activity_code"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".SathActivity" />
-        <activity android:name=".SelectionActivity"></activity>
+        <activity android:name=".SelectionActivity" />
+        <activity
+            android:name=".StatViewerActivity"
+            android:label="@string/title_activity_stat_viewer"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
