@@ -1,5 +1,6 @@
 package com.example.athidya.mydataapp;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -14,6 +15,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.athidya.mydataapp.R;
@@ -22,6 +24,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.json.*;
 
@@ -44,7 +49,6 @@ public class StatViewerActivity extends AppCompatActivity {
     String playerid = "";
     String[] stats = new String[28];
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,36 +63,44 @@ public class StatViewerActivity extends AppCompatActivity {
         initialStatView(queue);
     }
 
+
+
     public void initialStatView(RequestQueue queue) {
-        //String queryurl ="https://fantasysports.yahooapis.com/fantasy/v2/users;use_login=1/games;game_keys=375/players/stats";
-        //String queryurl = "https://fantasysports.yahooapis.com/fantasy/v2/users;use_login=1/games;game_keys=375/leagues";
-        String queryurl = "https://fantasysports.yahooapis.com/fantasy/v2/users;use_login=1/games;game_keys=375/leagues;league_key=375.1.27726/teams";
+
+        String URL_START = "https://fantasysports.yahooapis.com";
+
+        String USER_INFO_URL = URL_START + "/fantasy/v2/users;use_login=1/games";
+        getResponse(queue,USER_INFO_URL); // figure out how we can get something back from this function
+        //String games_id // we need to run commandgetGamesId and put in the url above then we add it to find the next information....
+        String playerQueryUrl = URL_START + "/fantasy/v2/users;use_login=1/games;game_keys=375/players/stats";
+        String leagueQueryUrl = URL_START + "/fantasy/v2/users;use_login=1/games;game_keys=375/leagues";
+        String StestQueryUrl = URL_START + "/fantasy/v2/users;use_login=1/games;game_keys=375/leagues;league_key=375.1.27726/teams";
+        String workingtestQueryUrl = URL_START + "/fantasy/v2/games;game_keys=364/leagues;league_keys=364.l.46339/teams";
+        String testQueryUrl = URL_START + "/fantasy/v2/games;game_keys=375/leagues;league_keys=375.1.27726/teams";
+        String TtestQueryUrl = URL_START + "/fantasy/v2/users;use_login=1/games;game_keys=364/leagues";
+
+        //ABOVE alot of cleaning to do and organizing so we can get data through functions and automate the process for any user
+        //fetch all teams from a league
+        //http://fantasysports.yahooapis.com/fantasy/v2/league/{league_key}/teams
+
+    }
+
+    public void getResponse(RequestQueue queue, String queryUrl){
+
+        RequestFuture<String> future = RequestFuture.newFuture();
         // Request a string response from the provided URL.
-        StringRequest jsonReq = new StringRequest(Request.Method.GET, queryurl,
+
+        StringRequest request2 = new StringRequest(Request.Method.POST,queryUrl,future,future);
+        StringRequest request = new StringRequest(Request.Method.GET, queryUrl,
                 new Response.Listener<String>() {
+
                     @Override
                     public void onResponse(String response) {
-                        // displays all recieved information correctly in the Log without cutoff
-                        List<String> printlog = new ArrayList<String>();
-                        int index = 0;
-                        while (index < response.length()) {
-                            printlog.add(response.substring(index, Math.min(index + 2000, response.length())));
-                            index +=2000;
-                        }
-                        for (int i = 0; i<printlog.size(); i++) {
-                            Log.d("data call", printlog.get(i));
-                        }
+                        privateLogger(response);
                         //Log.d("Data call back", response);
-                        JSONObject jsonresponse = null;
-                        try {
-                            jsonresponse = XML.toJSONObject(response);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        Log.d("json", jsonresponse.toString());
-                        //responseParse(jsonresponse);
-
+                        JSONObject responseJSON = convertToJSON(response);
+                        Log.d("json", responseJSON.toString());
+                        Log.d("json", getGamesId(responseJSON).toString());
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -96,7 +108,7 @@ public class StatViewerActivity extends AppCompatActivity {
                 Log.d("data error","That didn't work!");
                 error.printStackTrace();
             }
-        }){
+                }){
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 HashMap<String, String> headers = new HashMap<String, String>();
@@ -104,8 +116,31 @@ public class StatViewerActivity extends AppCompatActivity {
                 return headers;
             }
         };
+
+
+
         // Add the request to the RequestQueue.
-        queue.add(jsonReq);
+        queue.add(request2);
+       /*try {
+            String response = future.get(1, TimeUnit.SECONDS);
+            Log.d("json",response);
+        } catch (InterruptedException e) {
+        } catch (ExecutionException e) {
+        } catch (TimeoutException e) {
+       }*/
+    }
+
+    public void privateLogger(String response){
+        // displays all received information correctly in the Log without cutoff
+        List<String> printlog = new ArrayList<String>();
+        int index = 0;
+        while (index < response.length()) {
+            printlog.add(response.substring(index, Math.min(index + 2000, response.length())));
+            index +=2000;
+        }
+        for (int i = 0; i<printlog.size(); i++) {
+            Log.d("data call", printlog.get(i));
+        }
     }
 
     public void responseParse(JSONObject response) {
@@ -133,5 +168,35 @@ public class StatViewerActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    // This will retrieve the gameID
+    public String getGamesId(JSONObject response) {
+        JSONObject tempJSON;
+        JSONArray tempJSONArray;
+        String tempString;
+        try {
+            tempJSON = response.getJSONObject("fantasy_content").getJSONObject("users").getJSONObject("user").getJSONObject("games");
+            tempJSONArray = tempJSON.getJSONArray("game");
+            tempJSON = tempJSONArray.getJSONObject(0);
+            //tempJSON = response.getJSONObject("fantasy_content").getJSONObject("users").getJSONObject("user").getJSONObject("games").getJSONObject("game");
+            tempString  = tempJSON.get("game_key").toString();
+                //Log.d("name", tempString +"Hi its sath and this worked");
+                return tempString;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public JSONObject convertToJSON(String response){
+
+        JSONObject jsonresponse = null;
+        try {
+            jsonresponse = XML.toJSONObject(response);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonresponse;
     }
 }
