@@ -12,7 +12,11 @@ public class PlayerInfo {
     private String playerid;
     private String firstName;
     private String lastName;
-    private String[] stats = new String[28];
+    private String[] statsStr = new String[28];
+    private Integer[] statsInt = new Integer[28];
+    public String[] statnames = {"GP", "GS", "MIN", "FGA", "FGM", "FG%", "FTA", "FTM", "FT%", "3PTA",
+                                "3PTM", "3PT%", "PTS", "OREB", "DREB", "REB", "AST", "ST", "BLK","TO",
+                                "A/T", "PF", "DISQ", "TECH", "EJCT", "FF", "MPG", "DD", "TD"};
     protected int fieldGoalAttempts,fieldGoalMade,
     freeThrowAttempts,freeThrowMade,
     threePointsMade,
@@ -78,4 +82,23 @@ public class PlayerInfo {
         String player = "Player ID: " + playerid + ", First Name: " + firstName + ", Last Name: " + lastName;
         return player;
     }
+
+    public void setStatsStr(String[] stats) {
+        this.statsStr = stats;
+        setStatsInt();
+    }
+    public String[] getStatsStr() {
+        return statsStr;
+    }
+    public void setStatsInt() {
+        for (int i = 0; i<statsStr.length; i++) {
+           if(statsStr[i].equals("-")) {
+               statsInt[i] = 0;
+           }
+            else{
+               statsInt[i] = Integer.parseInt(statsStr[i]);
+           }
+        }
+    }
+
 }

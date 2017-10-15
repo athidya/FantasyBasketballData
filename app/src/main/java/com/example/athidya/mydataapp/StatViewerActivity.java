@@ -25,6 +25,14 @@ import java.util.Map;
 
 import org.json.*;
 
+
+/*
+* remember to display the teams as the current users first, next the team he will be facing in the next week
+* and then in order underneath
+* as the weeks change the order it should be viewed in should also change
+* so make entries to match the current week
+* also default view should be current weeks line up
+* */
 public class StatViewerActivity extends AppCompatActivity {
 
     String access_token = "";
@@ -52,7 +60,9 @@ public class StatViewerActivity extends AppCompatActivity {
     }
 
     public void initialStatView(RequestQueue queue) {
-        String queryurl ="https://fantasysports.yahooapis.com/fantasy/v2/users;use_login=1/games;game_keys=375/players/stats";
+        //String queryurl ="https://fantasysports.yahooapis.com/fantasy/v2/users;use_login=1/games;game_keys=375/players/stats";
+        //String queryurl = "https://fantasysports.yahooapis.com/fantasy/v2/users;use_login=1/games;game_keys=375/leagues";
+        String queryurl = "https://fantasysports.yahooapis.com/fantasy/v2/users;use_login=1/games;game_keys=375/leagues;league_key=375.1.27726/teams";
         // Request a string response from the provided URL.
         StringRequest jsonReq = new StringRequest(Request.Method.GET, queryurl,
                 new Response.Listener<String>() {
@@ -77,7 +87,7 @@ public class StatViewerActivity extends AppCompatActivity {
                         }
 
                         Log.d("json", jsonresponse.toString());
-                        responseParse(jsonresponse);
+                        //responseParse(jsonresponse);
 
                     }
                 }, new Response.ErrorListener() {
@@ -111,7 +121,6 @@ public class StatViewerActivity extends AppCompatActivity {
                 playerid = player.get("player_id").toString();
                 playerstats = player.getJSONObject("player_stats").getJSONObject("stats").getJSONArray("stat");
                 playersList[i]  = new PlayerInfo(playerid, name.get("first").toString(), name.get("last").toString());
-
                 for (int j = 0; j<28; j++) {
                     stats[j] = playerstats.getJSONObject(j).get("value").toString();
                     Log.d("stat", stats[j].toString());
