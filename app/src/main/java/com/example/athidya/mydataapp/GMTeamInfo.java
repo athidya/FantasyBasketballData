@@ -7,6 +7,7 @@ package com.example.athidya.mydataapp;
 public class GMTeamInfo {
 
     public String teamName = "";
+    public String teamKey = " ";
     public PlayerInfo[] players;
     public int fieldGoalAttemptsTotal,fieldGoalMadeTotal,
             freeThrowAttemptsTotal,freeThrowMadeTotal,
@@ -19,8 +20,9 @@ public class GMTeamInfo {
             turnoversTotal;
     public float fieldGoalPercentageTotal,freeThrowPercentageTotal;
 
-    public GMTeamInfo(String teamName,PlayerInfo[] players) {
+    public GMTeamInfo(String teamKey,String teamName,PlayerInfo[] players) {
         this.teamName=teamName;
+        this.teamKey = teamKey;
         this.players = players;
         this.fieldGoalMadeTotal=this.freeThrowMadeTotal=0;
         this.threePointsMadeTotal=this.pointsTotal=0;

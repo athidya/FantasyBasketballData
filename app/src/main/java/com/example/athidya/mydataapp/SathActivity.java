@@ -168,8 +168,8 @@ public class SathActivity extends AppCompatActivity {
         String statType = buttonArray[2].getText().toString();
 
 
-        GMTeamInfo firstTeam = new GMTeamInfo(teamA,getPlayerInfo(teamA));
-        GMTeamInfo secondTeam = new GMTeamInfo(teamB,getPlayerInfo(teamB));
+        GMTeamInfo firstTeam = new GMTeamInfo(teamA,teamA,getPlayerInfo(teamA));
+        GMTeamInfo secondTeam = new GMTeamInfo(teamB,teamB,getPlayerInfo(teamB));
 
         //Here you would pull their average stats and put it into each player
         //including number of games they would play this week

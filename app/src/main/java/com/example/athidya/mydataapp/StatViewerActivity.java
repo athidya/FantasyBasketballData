@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -40,6 +41,10 @@ import org.json.*;
 * */
 public class StatViewerActivity extends AppCompatActivity {
 
+
+    String URL_START = "https://fantasysports.yahooapis.com";
+    String USER_INFO_URL = URL_START + "/fantasy/v2/users;use_login=1/games/leagues";
+
     String access_token = "";
     JSONObject playercount = null;
     JSONArray players = null;
@@ -48,6 +53,8 @@ public class StatViewerActivity extends AppCompatActivity {
     JSONObject name = null;
     String playerid = "";
     String[] stats = new String[28];
+
+    GMTeamInfo[] globalGmTeamInfos = new GMTeamInfo[14];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,11 +74,9 @@ public class StatViewerActivity extends AppCompatActivity {
 
     public void initialStatView(RequestQueue queue) {
 
-        String URL_START = "https://fantasysports.yahooapis.com";
 
-        String USER_INFO_URL = URL_START + "/fantasy/v2/users;use_login=1/games";
         getResponse(queue,USER_INFO_URL); // figure out how we can get something back from this function
-        //String games_id // we need to run commandgetGamesId and put in the url above then we add it to find the next information....
+
         String playerQueryUrl = URL_START + "/fantasy/v2/users;use_login=1/games;game_keys=375/players/stats";
         String leagueQueryUrl = URL_START + "/fantasy/v2/users;use_login=1/games;game_keys=375/leagues";
         String StestQueryUrl = URL_START + "/fantasy/v2/users;use_login=1/games;game_keys=375/leagues;league_key=375.1.27726/teams";
@@ -85,22 +90,30 @@ public class StatViewerActivity extends AppCompatActivity {
 
     }
 
+    //Gets the first Response on the league informationa and etc
     public void getResponse(RequestQueue queue, String queryUrl){
 
+        final RequestQueue queue2 = queue;
         RequestFuture<String> future = RequestFuture.newFuture();
         // Request a string response from the provided URL.
 
-        StringRequest request2 = new StringRequest(Request.Method.POST,queryUrl,future,future);
         StringRequest request = new StringRequest(Request.Method.GET, queryUrl,
                 new Response.Listener<String>() {
 
                     @Override
                     public void onResponse(String response) {
-                        privateLogger(response);
+                        //privateLogger(response);
                         //Log.d("Data call back", response);
                         JSONObject responseJSON = convertToJSON(response);
                         Log.d("json", responseJSON.toString());
-                        Log.d("json", getGamesId(responseJSON).toString());
+                        String gameID =  getGamesId(responseJSON).toString();
+                        String league_ID = getLeagueId(responseJSON).toString();
+                        int teamCount = Integer.parseInt(getTeamCount(responseJSON));
+
+                        Log.d("json", "GAME_ID = " +gameID);
+                        Log.d("json", "LEAGUE_ID = " + league_ID);
+                        Log.d("json", "team_count = " + teamCount);
+                        pullTeamData(queue2,gameID,league_ID,teamCount);
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -116,20 +129,90 @@ public class StatViewerActivity extends AppCompatActivity {
                 return headers;
             }
         };
-
-
-
         // Add the request to the RequestQueue.
-        queue.add(request2);
-       /*try {
-            String response = future.get(1, TimeUnit.SECONDS);
-            Log.d("json",response);
-        } catch (InterruptedException e) {
-        } catch (ExecutionException e) {
-        } catch (TimeoutException e) {
-       }*/
+        queue.add(request);
     }
 
+    //Pull second set of Data, runs after the first request has been pushed
+    public void pullTeamData(RequestQueue queue, String gamesID, String leagueID, final int teamCount) {
+
+        String teamsUrl = URL_START + "/fantasy/v2/games;game_keys="+gamesID+"/leagues;league_keys="+leagueID+"/teams;team_keys="+leagueID+".t.1";
+        final RequestQueue queue2request = queue;
+        RequestFuture<String> future = RequestFuture.newFuture();
+        // Request a string response from the provided URL.
+        for (int i=1;i<teamCount+1;i++){
+            teamsUrl = URL_START + "/fantasy/v2/games;game_keys="+gamesID+"/leagues;league_keys="+leagueID+"/teams;team_keys="+leagueID+".t."+i+"/roster";
+            addToQueue(teamsUrl,queue2request);
+        }
+    }
+
+    //Adds data to get put into the queue to store all gm and team member information helps pullAllData
+    public void addToQueue(String url,RequestQueue queue){
+
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //privateLogger(response);
+                        //Log.d("Data call back", response);
+                        JSONObject responseJSON = convertToJSON(response);
+                        Log.d("json", responseJSON.toString());
+
+                        int teamID = Integer.parseInt(getTeamID(responseJSON));
+                        Log.d("json", "This is the order  ================== "+teamID);
+                        Log.d("json", "Team name = " + getTeamName(responseJSON));
+                        int playerCount = Integer.parseInt(getPlayerCount(responseJSON));
+                        Log.d("json", "Players Count = " + playerCount);
+
+                        PlayerInfo[] playerInfo = new PlayerInfo[playerCount];
+                        for (int i = 0; i<playerCount;i++)
+                        {
+                            String[] info = getPlayerInfo(responseJSON,i);
+                            Log.d("json", "Player Key = " + info[0]);
+                            Log.d("json", "First Name = " + info[1]);
+                            Log.d("json", "Last Name = " + info[2]);
+                            playerInfo[i]=new PlayerInfo(info);
+                        }
+                        String teamKey = getTeamKey(responseJSON);
+                        String teamName = getTeamName(responseJSON);
+                        globalGmTeamInfos[teamID-1]=new GMTeamInfo(teamKey,teamName,playerInfo);
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("data error","That didn't work!");
+                error.printStackTrace();
+            }
+        }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Authorization", "Bearer " + access_token);
+                return headers;
+            }
+        };
+
+        queue.add(request);
+
+    }
+
+    //Will pull all the specific information and data for each player
+   /* public void pullPlayerData(RequestQueue queue, GMTeamInfo gmTeamInfo) {
+
+        String teamsUrl = URL_START + "/fantasy/v2/games;game_keys="+gamesID+"/leagues;league_keys="+leagueID+"/teams;team_keys="+leagueID+".t.1";
+        final RequestQueue queue2request = queue;
+        RequestFuture<String> future = RequestFuture.newFuture();
+        // Request a string response from the provided URL.
+        for (int i=1;i<teamCount+1;i++){
+            teamsUrl = URL_START + "/fantasy/v2/games;game_keys="+gamesID+"/leagues;league_keys="+leagueID+"/teams;team_keys="+leagueID+".t."+i+"/roster";
+            addToQueue(teamsUrl,queue2request);
+        }
+    }*/
+
+
+
+    //Logs the response for us to see
     public void privateLogger(String response){
         // displays all received information correctly in the Log without cutoff
         List<String> printlog = new ArrayList<String>();
@@ -143,6 +226,8 @@ public class StatViewerActivity extends AppCompatActivity {
         }
     }
 
+
+    /*
     public void responseParse(JSONObject response) {
         try {
             playercount = response.getJSONObject("fantasy_content").getJSONObject("users").getJSONObject("user").getJSONObject("games").getJSONObject("game").getJSONObject("players"); //to know the number of iterations
@@ -169,7 +254,9 @@ public class StatViewerActivity extends AppCompatActivity {
 
 
     }
+*/
 
+    //======================BELOW ARE THE JSON KEYS TO SEARCH FOR EACH TYPE OF OBJECT===============
     // This will retrieve the gameID
     public String getGamesId(JSONObject response) {
         JSONObject tempJSON;
@@ -181,14 +268,178 @@ public class StatViewerActivity extends AppCompatActivity {
             tempJSON = tempJSONArray.getJSONObject(0);
             //tempJSON = response.getJSONObject("fantasy_content").getJSONObject("users").getJSONObject("user").getJSONObject("games").getJSONObject("game");
             tempString  = tempJSON.get("game_key").toString();
-                //Log.d("name", tempString +"Hi its sath and this worked");
-                return tempString;
+            //Log.d("name", tempString +"Hi its sath and this worked");
+            return tempString;
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
         }
     }
 
+    // This will retrieve the LeagueID
+    public String getLeagueId(JSONObject response) {
+        JSONObject tempJSON;
+        JSONArray tempJSONArray;
+        String tempString;
+        try {
+            tempJSON = response.getJSONObject("fantasy_content").getJSONObject("users").getJSONObject("user").getJSONObject("games");
+            tempJSONArray = tempJSON.getJSONArray("game");
+            tempJSON = tempJSONArray.getJSONObject(0);
+            //tempJSON = response.getJSONObject("fantasy_content").getJSONObject("users").getJSONObject("user").getJSONObject("games").getJSONObject("game");
+            tempString  = tempJSON.getJSONObject("leagues").getJSONObject("league").get("league_key").toString();
+            return tempString;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    //Get number of teams
+    public String getTeamCount(JSONObject response) {
+        JSONObject tempJSON;
+        JSONArray tempJSONArray;
+        String tempString;
+        try {
+            tempJSON = response.getJSONObject("fantasy_content");
+            tempJSON = tempJSON.getJSONObject("users");
+            tempJSON = tempJSON.getJSONObject("user");
+            tempJSON = tempJSON.getJSONObject("games");
+            tempJSONArray = tempJSON.getJSONArray("game");
+            tempJSON = tempJSONArray.getJSONObject(0);
+            tempJSON = tempJSON.getJSONObject("leagues");
+            tempJSON = tempJSON.getJSONObject("league");
+            tempString  = tempJSON.get("num_teams").toString();
+
+            return tempString;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    //Get team name
+    public String getTeamName(JSONObject response) {
+        JSONObject tempJSON;
+        JSONArray tempJSONArray;
+        String tempString;
+        try {
+            tempJSON = response.getJSONObject("fantasy_content");
+            tempJSON = tempJSON.getJSONObject("games");
+            tempJSON = tempJSON.getJSONObject("game");
+            tempJSON = tempJSON.getJSONObject("leagues");
+            tempJSON = tempJSON.getJSONObject("league");
+            tempJSON = tempJSON.getJSONObject("teams");
+            tempJSON = tempJSON.getJSONObject("team");
+
+            tempString  = tempJSON.get("name").toString();
+
+            return tempString;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    //Get team key
+    public String getTeamKey(JSONObject response) {
+        JSONObject tempJSON;
+        JSONArray tempJSONArray;
+        String tempString;
+        try {
+            tempJSON = response.getJSONObject("fantasy_content");
+            tempJSON = tempJSON.getJSONObject("games");
+            tempJSON = tempJSON.getJSONObject("game");
+            tempJSON = tempJSON.getJSONObject("leagues");
+            tempJSON = tempJSON.getJSONObject("league");
+            tempJSON = tempJSON.getJSONObject("teams");
+            tempJSON = tempJSON.getJSONObject("team");
+
+            tempString  = tempJSON.get("team_key").toString();
+
+            return tempString;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    //Get team key
+    public String getTeamID(JSONObject response) {
+        JSONObject tempJSON;
+        JSONArray tempJSONArray;
+        String tempString;
+        try {
+            tempJSON = response.getJSONObject("fantasy_content");
+            tempJSON = tempJSON.getJSONObject("games");
+            tempJSON = tempJSON.getJSONObject("game");
+            tempJSON = tempJSON.getJSONObject("leagues");
+            tempJSON = tempJSON.getJSONObject("league");
+            tempJSON = tempJSON.getJSONObject("teams");
+            tempJSON = tempJSON.getJSONObject("team");
+
+            tempString  = tempJSON.get("team_id").toString();
+
+            return tempString;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    //Get players count
+    public String getPlayerCount(JSONObject response) {
+        JSONObject tempJSON;
+        JSONArray tempJSONArray;
+        String tempString;
+        try {
+            tempJSON = response.getJSONObject("fantasy_content");
+            tempJSON = tempJSON.getJSONObject("games");
+            tempJSON = tempJSON.getJSONObject("game");
+            tempJSON = tempJSON.getJSONObject("leagues");
+            tempJSON = tempJSON.getJSONObject("league");
+            tempJSON = tempJSON.getJSONObject("teams");
+            tempJSON = tempJSON.getJSONObject("team");
+            tempJSON = tempJSON.getJSONObject("roster");
+            tempJSON = tempJSON.getJSONObject("players");
+
+            tempString  = tempJSON.get("count").toString();
+
+            return tempString;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    //Get playerkey,first name, last name
+    public String[] getPlayerInfo(JSONObject response, int index) {
+        JSONObject tempJSON;
+        JSONArray tempJSONArray;
+        String[] tempString=new String[3];
+        try {
+            tempJSON = response.getJSONObject("fantasy_content");
+            tempJSON = tempJSON.getJSONObject("games");
+            tempJSON = tempJSON.getJSONObject("game");
+            tempJSON = tempJSON.getJSONObject("leagues");
+            tempJSON = tempJSON.getJSONObject("league");
+            tempJSON = tempJSON.getJSONObject("teams");
+            tempJSON = tempJSON.getJSONObject("team");
+            tempJSON = tempJSON.getJSONObject("roster");
+            tempJSON = tempJSON.getJSONObject("players");
+            tempJSONArray = tempJSON.getJSONArray("player");
+            tempJSON = tempJSONArray.getJSONObject(index);
+            tempString[0]  = tempJSON.get("player_key").toString();
+            tempString[1]  = tempJSON.getJSONObject("name").get("first").toString();
+            tempString[2]  = tempJSON.getJSONObject("name").get("last").toString();
+
+            return tempString;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    //Converts XML to JSON
     public JSONObject convertToJSON(String response){
 
         JSONObject jsonresponse = null;
@@ -199,4 +450,9 @@ public class StatViewerActivity extends AppCompatActivity {
         }
         return jsonresponse;
     }
+
+    //==============================================================================================
+
+
+
 }

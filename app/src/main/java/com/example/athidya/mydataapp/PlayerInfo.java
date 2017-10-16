@@ -31,11 +31,11 @@ public class PlayerInfo {
     public String teamName;
     public int numOfGamesToPlay;
 
-    public PlayerInfo(String playerid, String firstName, String lastName)
+    public PlayerInfo(String[] info )
     {
-        this.playerid = playerid;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.playerid = info[0];
+        this.firstName = info[1];
+        this.lastName = info[2];
         //this.teamName = teamName;
         this.fieldGoalMade=this.freeThrowMade =0;
         this.threePointsMade=this.points=0;
