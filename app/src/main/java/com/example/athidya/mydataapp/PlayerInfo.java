@@ -100,5 +100,8 @@ public class PlayerInfo {
            }
         }
     }
+    public String getPlayerid() {
+        return playerid;
+    }
 
 }

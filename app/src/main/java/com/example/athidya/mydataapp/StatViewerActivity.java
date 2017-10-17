@@ -8,6 +8,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -21,6 +24,7 @@ import com.android.volley.toolbox.Volley;
 import com.example.athidya.mydataapp.R;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +34,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.json.*;
+
+import static com.example.athidya.mydataapp.R.id.spinner10;
+import static com.example.athidya.mydataapp.R.id.spinner11;
+import static com.example.athidya.mydataapp.R.id.spinner12;
+import static com.example.athidya.mydataapp.R.id.spinner13;
 
 
 /*
@@ -56,6 +65,26 @@ public class StatViewerActivity extends AppCompatActivity {
 
     GMTeamInfo[] globalGmTeamInfos = new GMTeamInfo[14];
 
+    public String[] statnames = {"GP", "GS", "MIN", "FGA", "FGM", "FG%", "FTA", "FTM", "FT%", "3PTA",
+            "3PTM", "3PT%", "PTS", "OREB", "DREB", "REB", "AST", "ST", "BLK","TO",
+            "A/T", "PF", "DISQ", "TECH", "EJCT", "FF", "MPG", "DD", "TD"};
+
+    /*
+      Initializing objects to see the stats on screen; to be called later and information entered into
+    */
+    Spinner timeSpinner;
+    Spinner teamSpinner;
+    Spinner playerSpinner;
+    Spinner statSpinner;
+
+    List<String> timeOptions;
+    List<String> teamOptions;
+    List<String> playerOptions;
+    List<String> statOptions;
+
+    TextView[] statsDisplay;
+    Integer teamcountager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +97,48 @@ public class StatViewerActivity extends AppCompatActivity {
         Log.d("access token",access_token);
         final RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
         initialStatView(queue);
+
+        //Initializing objects to see the stats on screen; to be called later and information entered into
+        timeSpinner = (Spinner) findViewById(spinner13);
+        teamSpinner = (Spinner) findViewById(spinner10);
+        playerSpinner = (Spinner) findViewById(spinner11);
+        statSpinner = (Spinner) findViewById(spinner12);
+
+        timeOptions = new ArrayList<String>();
+        teamOptions = new ArrayList<String>();
+        playerOptions = new ArrayList<String>();
+        statOptions = new ArrayList<String>();
+
+        /*
+        time and stat spinners options are constant so initialized and updated here, other spinners vary so they will be initialized
+        here but updated when teams and players info have been collected from our requests
+         */
+        timeOptions.add("This Week");
+        timeOptions.add("Last Week");
+        timeOptions.add("Last Month");
+        timeOptions.add("Last Season");
+
+
+
+        ArrayAdapter<String> timedataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, timeOptions);
+        timedataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        timeSpinner.setAdapter(timedataAdapter);
+
+        ArrayAdapter<String> teamdataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, teamOptions);
+        teamdataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        teamSpinner.setAdapter(teamdataAdapter);
+
+        ArrayAdapter<String> playerdataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, playerOptions);
+        playerdataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        playerSpinner.setAdapter(playerdataAdapter);
+
+
+        for(int i = 0; i<stats.length; i++) {
+            statOptions.add(statnames[i]);
+        }
+        ArrayAdapter<String> statdataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, statOptions);
+        statdataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        statSpinner.setAdapter(statdataAdapter);
     }
 
 
@@ -93,6 +164,7 @@ public class StatViewerActivity extends AppCompatActivity {
     //Gets the first Response on the league informationa and etc
     public void getResponse(RequestQueue queue, String queryUrl){
 
+        final String[] resp = new String[1];
         final RequestQueue queue2 = queue;
         RequestFuture<String> future = RequestFuture.newFuture();
         // Request a string response from the provided URL.
@@ -109,6 +181,7 @@ public class StatViewerActivity extends AppCompatActivity {
                         String gameID =  getGamesId(responseJSON).toString();
                         String league_ID = getLeagueId(responseJSON).toString();
                         int teamCount = Integer.parseInt(getTeamCount(responseJSON));
+                        teamcountager = teamCount;
 
                         Log.d("json", "GAME_ID = " +gameID);
                         Log.d("json", "LEAGUE_ID = " + league_ID);
@@ -137,17 +210,18 @@ public class StatViewerActivity extends AppCompatActivity {
     public void pullTeamData(RequestQueue queue, String gamesID, String leagueID, final int teamCount) {
 
         String teamsUrl = URL_START + "/fantasy/v2/games;game_keys="+gamesID+"/leagues;league_keys="+leagueID+"/teams;team_keys="+leagueID+".t.1";
+        String statsUrl = "";
         final RequestQueue queue2request = queue;
         RequestFuture<String> future = RequestFuture.newFuture();
         // Request a string response from the provided URL.
         for (int i=1;i<teamCount+1;i++){
             teamsUrl = URL_START + "/fantasy/v2/games;game_keys="+gamesID+"/leagues;league_keys="+leagueID+"/teams;team_keys="+leagueID+".t."+i+"/roster";
-            addToQueue(teamsUrl,queue2request);
+            addToQueue(teamsUrl,queue2request, gamesID, leagueID);
         }
     }
 
     //Adds data to get put into the queue to store all gm and team member information helps pullAllData
-    public void addToQueue(String url,RequestQueue queue){
+    public void addToQueue(final String url, final RequestQueue queue, final String gamesID, final String leagueID){
 
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -164,6 +238,12 @@ public class StatViewerActivity extends AppCompatActivity {
                         int playerCount = Integer.parseInt(getPlayerCount(responseJSON));
                         Log.d("json", "Players Count = " + playerCount);
 
+
+                        /*
+                        save team names to spinner to allow user to choose specific teams info
+                         */
+                        teamOptions.add(getTeamName(responseJSON));
+
                         PlayerInfo[] playerInfo = new PlayerInfo[playerCount];
                         for (int i = 0; i<playerCount;i++)
                         {
@@ -172,11 +252,13 @@ public class StatViewerActivity extends AppCompatActivity {
                             Log.d("json", "First Name = " + info[1]);
                             Log.d("json", "Last Name = " + info[2]);
                             playerInfo[i]=new PlayerInfo(info);
+                            //put somewhere else because all the damn players showing up at once fool
+                            playerOptions.add(info[1] + " " + info[2]);
                         }
                         String teamKey = getTeamKey(responseJSON);
                         String teamName = getTeamName(responseJSON);
                         globalGmTeamInfos[teamID-1]=new GMTeamInfo(teamKey,teamName,playerInfo);
-
+                        getPlayerStats(globalGmTeamInfos[teamID-1], queue, gamesID, leagueID, teamKey);
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -196,6 +278,50 @@ public class StatViewerActivity extends AppCompatActivity {
         queue.add(request);
 
     }
+
+
+    public void getPlayerStats(GMTeamInfo GMTeam, RequestQueue queue, String gamesID, String leagueID ,String teamkey) {
+        for(int i=0; i<GMTeam.players.length; i++) {
+            String STATS_URL = "/fantasy/v2/player/" + GMTeam.players[i].getPlayerid() + "/stats" ;
+            addtestreq(STATS_URL, queue);
+        }
+    }
+    /*
+    TESTINGGG
+     */
+    public void addtestreq(String url,RequestQueue queue){
+
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        privateLogger(response);
+                        //Log.d("Data call back", response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("data error","That didn't work!");
+                error.printStackTrace();
+            }
+        }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<String, String>();
+                headers.put("Authorization", "Bearer " + access_token);
+                return headers;
+            }
+        };
+
+        queue.add(request);
+
+    }
+
+
+
+
+
+
 
     //Will pull all the specific information and data for each player
    /* public void pullPlayerData(RequestQueue queue, GMTeamInfo gmTeamInfo) {
