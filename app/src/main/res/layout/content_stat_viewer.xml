@@ -19,11 +19,15 @@
         android:layout_below="@+id/spinner13"
         android:layout_marginTop="21dp">
 
-        <TableLayout
-            android:id="@+id/main_table"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        </TableLayout>
+        <HorizontalScrollView android:layout_height="match_parent"
+            android:layout_width="350dp">
+
+            <TableLayout
+                android:id="@+id/main_table"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </TableLayout>
+        </HorizontalScrollView>
 
     </android.support.v4.widget.NestedScrollView>
 

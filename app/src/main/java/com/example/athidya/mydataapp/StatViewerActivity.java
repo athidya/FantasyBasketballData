@@ -481,17 +481,27 @@ public class StatViewerActivity extends AppCompatActivity {
         label_TeamName.setPadding(5, 5, 5, 5);
         tr_head.addView(label_TeamName); //add to table row
 
-        //create column 2
-        TextView label_stats = new TextView(this);
+        //create stats columns
+        String[] statsnames = {"FGA", "FGM", "FG%", "3PM", "FTA", "FTM", "FT%", "PTS", "REB", "AST", "ST", "BLK",  "TO"};
+        TextView[] label_stats = new TextView[statsnames.length];
+        for (int i = 0; i<statsnames.length; i++) {
+            label_stats[i] = new TextView(this);
+            label_stats[i].setId(i+112);
+            label_stats[i].setText(statsnames[i]);
+            label_stats[i].setTextColor(Color.BLACK);
+            label_stats[i].setPadding(5, 5, 5, 5);
+            tr_head.addView(label_stats[i]);
+        }
+        /* TextView label_stats = new TextView(this);
         label_stats.setId(View.generateViewId());
-        label_stats.setText("Team Stats AST ");
+        label_stats.setText("FGA  FGM  FG%  3PM  FTA  FTM  FT%  PTS  REB  AST ST  BLK  TO");
         label_stats.setTextColor(Color.BLACK);
         label_stats.setPadding(5, 5, 5, 5);
-        tr_head.addView(label_stats);
+        tr_head.addView(label_stats); */
 
         t1.addView(tr_head, new TableLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         TextView[] teamNames = new TextView[teamOrder.length];
-        TextView[] teamStats = new TextView[teamOrder.length];
+        TextView[][] teamStats = new TextView[teamOrder.length][statsnames.length];
         TableRow[] tr_list = new TableRow[teamOrder.length];
 
 
@@ -506,18 +516,24 @@ public class StatViewerActivity extends AppCompatActivity {
             teamNames[i].setTextColor(Color.BLACK);
             teamNames[i].setPadding(5, 5, 5, 5);
 
-            teamStats[i] = new TextView(this);
-            teamStats[i].setId(i+112);
-            teamStats[i].setTextColor(Color.BLACK);
-            teamStats[i].setPadding(5, 5, 5, 5);
-
             for(int j = 0; j<globalGmTeamInfos.length; j++) {
                 if(teamOrder[i-1].equals(globalGmTeamInfos[j].teamKey)) {
                     globalGmTeamInfos[j].CalculateTotal();
                     teamNames[i].setText(globalGmTeamInfos[j].teamName);
-                    teamStats[i].setText(globalGmTeamInfos[j].getStats());
+
+                    String [] stats = globalGmTeamInfos[j].getStats();
                     tr_list[i].addView(teamNames[i]);
-                    tr_list[i].addView(teamStats[i]);
+                    for (int k=0; k<statsnames.length; k++) {
+                        teamStats[i][k] = new TextView(this);
+                        teamStats[i][k].setId(i+112);
+                        teamStats[i][k].setTextColor(Color.BLACK);
+                        teamStats[i][k].setPadding(5, 5, 5, 5);
+                        teamStats[i][k].setText(stats[k]);
+                        tr_list[i].addView(teamStats[i][k]);
+                    }
+
+
+
                 }
             }
             t1.addView(tr_list[i]);

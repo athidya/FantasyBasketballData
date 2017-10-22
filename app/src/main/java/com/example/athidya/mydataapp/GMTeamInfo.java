@@ -81,13 +81,12 @@ public class GMTeamInfo {
         return stats;
     }
 
-    public String getStats() {
+    public String[] getStats() {
         DecimalFormat df = new DecimalFormat("#.##");
-        return fieldGoalAttemptsTotal + " " + fieldGoalMadeTotal +  " "
-                + df.format(fieldGoalPercentageTotal) + " " + threePointsMadeTotal + " " + freeThrowAttemptsTotal
-                + " " + freeThrowMadeTotal + " " + df.format(freeThrowPercentageTotal) + " " + pointsTotal + " "
-                + " " + reboundsTotal + " " + assistsTotal;
+        String [] stats = {String.valueOf(fieldGoalAttemptsTotal), String.valueOf(fieldGoalMadeTotal), df.format(fieldGoalPercentageTotal), String.valueOf(threePointsMadeTotal), String.valueOf(freeThrowAttemptsTotal),
+                String.valueOf(freeThrowMadeTotal), df.format(freeThrowPercentageTotal), String.valueOf(pointsTotal), String.valueOf(reboundsTotal), String.valueOf(assistsTotal), String.valueOf(stealsTotal), String.valueOf(blocksTotal), String.valueOf(turnoversTotal)};
 
+        return stats;
     }
 }
 
