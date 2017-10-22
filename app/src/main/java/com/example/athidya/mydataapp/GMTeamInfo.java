@@ -1,5 +1,7 @@
 package com.example.athidya.mydataapp;
 
+import java.text.DecimalFormat;
+
 /**
  * Created by s5vignes on 2017-10-02.
  */
@@ -7,7 +9,7 @@ package com.example.athidya.mydataapp;
 public class GMTeamInfo {
 
     public String teamName = "";
-    public String teamKey = " ";
+    public String teamKey = "";
     public PlayerInfo[] players;
     public int fieldGoalAttemptsTotal,fieldGoalMadeTotal,
             freeThrowAttemptsTotal,freeThrowMadeTotal,
@@ -77,6 +79,15 @@ public class GMTeamInfo {
     public float[] TotalPercentage(){
         float[] stats   = {fieldGoalPercentageTotal,freeThrowPercentageTotal};
         return stats;
+    }
+
+    public String getStats() {
+        DecimalFormat df = new DecimalFormat("#.##");
+        return fieldGoalAttemptsTotal + " " + fieldGoalMadeTotal +  " "
+                + df.format(fieldGoalPercentageTotal) + " " + threePointsMadeTotal + " " + freeThrowAttemptsTotal
+                + " " + freeThrowMadeTotal + " " + df.format(freeThrowPercentageTotal) + " " + pointsTotal + " "
+                + " " + reboundsTotal + " " + assistsTotal;
+
     }
 }
 

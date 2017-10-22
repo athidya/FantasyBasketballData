@@ -83,7 +83,7 @@ public class PlayerInfo {
         return player;
     }
 
-    public void setStatsStr(String[] stats) {
+    /*public void setStatsStr(String[] stats) {
         this.statsStr = stats;
         setStatsInt();
     }
@@ -99,7 +99,7 @@ public class PlayerInfo {
                statsInt[i] = Integer.parseInt(statsStr[i]);
            }
         }
-    }
+    }*/
     public String getPlayerid() {
         return playerid;
     }
