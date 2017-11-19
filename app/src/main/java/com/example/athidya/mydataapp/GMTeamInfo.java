@@ -45,17 +45,19 @@ public class GMTeamInfo {
 
             numOfGamesToPlay = players[i].numOfGamesToPlay;
 
-            fieldGoalAttemptsTotal+= players[i].fieldGoalAttempts*numOfGamesToPlay;
-            fieldGoalMadeTotal+= players[i].fieldGoalMade*numOfGamesToPlay;
-            freeThrowAttemptsTotal+= players[i].freeThrowAttempts*numOfGamesToPlay;
-            freeThrowMadeTotal+= players[i].freeThrowMade*numOfGamesToPlay;
-            threePointsMadeTotal+= players[i].threePointsMade*numOfGamesToPlay;
-            pointsTotal+= players[i].points*numOfGamesToPlay;
-            reboundsTotal+= players[i].rebounds*numOfGamesToPlay;
-            assistsTotal+= players[i].assists*numOfGamesToPlay;
-            stealsTotal+= players[i].steals*numOfGamesToPlay;
-            blocksTotal+= players[i].blocks*numOfGamesToPlay;
-            turnoversTotal+= players[i].turnovers*numOfGamesToPlay;
+            if(players[i].numOfGamesPlayed!=0) {
+                fieldGoalAttemptsTotal+= (players[i].fieldGoalAttempts/players[i].numOfGamesPlayed)*numOfGamesToPlay;
+                fieldGoalMadeTotal+= (players[i].fieldGoalMade/players[i].numOfGamesPlayed)*numOfGamesToPlay;
+                freeThrowAttemptsTotal+= (players[i].freeThrowAttempts/players[i].numOfGamesPlayed)*numOfGamesToPlay;
+                freeThrowMadeTotal+= (players[i].freeThrowMade/players[i].numOfGamesPlayed)*numOfGamesToPlay;
+                threePointsMadeTotal+= (players[i].threePointsMade/players[i].numOfGamesPlayed)*numOfGamesToPlay;
+                pointsTotal+= (players[i].points/players[i].numOfGamesPlayed)*numOfGamesToPlay;
+                reboundsTotal+= (players[i].rebounds/players[i].numOfGamesPlayed)*numOfGamesToPlay;
+                assistsTotal+= (players[i].assists/players[i].numOfGamesPlayed)*numOfGamesToPlay;
+                stealsTotal+= (players[i].steals/players[i].numOfGamesPlayed)*numOfGamesToPlay;
+                blocksTotal+= (players[i].blocks/players[i].numOfGamesPlayed)*numOfGamesToPlay;
+                turnoversTotal+= (players[i].turnovers/players[i].numOfGamesPlayed)*numOfGamesToPlay;
+            }
 
         }
 
@@ -83,8 +85,8 @@ public class GMTeamInfo {
 
     public String[] getStats() {
         DecimalFormat df = new DecimalFormat("#.##");
-        String [] stats = {String.valueOf(fieldGoalAttemptsTotal), String.valueOf(fieldGoalMadeTotal), df.format(fieldGoalPercentageTotal), String.valueOf(threePointsMadeTotal), String.valueOf(freeThrowAttemptsTotal),
-                String.valueOf(freeThrowMadeTotal), df.format(freeThrowPercentageTotal), String.valueOf(pointsTotal), String.valueOf(reboundsTotal), String.valueOf(assistsTotal), String.valueOf(stealsTotal), String.valueOf(blocksTotal), String.valueOf(turnoversTotal)};
+        String [] stats = {df.format(fieldGoalPercentageTotal), String.valueOf(threePointsMadeTotal),
+                df.format(freeThrowPercentageTotal), String.valueOf(pointsTotal), String.valueOf(reboundsTotal), String.valueOf(assistsTotal), String.valueOf(stealsTotal), String.valueOf(blocksTotal), String.valueOf(turnoversTotal)};
 
         return stats;
     }

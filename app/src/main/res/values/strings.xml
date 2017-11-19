@@ -108,4 +108,5 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="title_activity_stat_viewer">StatViewerActivity</string>
+    <string name="title_activity_predictions">PredictionsActivity</string>
 </resources>

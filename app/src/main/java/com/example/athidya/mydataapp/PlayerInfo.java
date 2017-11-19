@@ -1,23 +1,22 @@
 package com.example.athidya.mydataapp;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.Random;
 
 /**
  * Created by s5vignes on 2017-10-02.
  */
 
-public class PlayerInfo {
+public class PlayerInfo implements Parcelable {
 
     public Random rand = new Random();
     private String playerid;
     private String firstName;
     private String lastName;
-    private String[] statsStr = new String[28];
-    private Integer[] statsInt = new Integer[28];
-    public String[] statnames = {"GP", "GS", "MIN", "FGA", "FGM", "FG%", "FTA", "FTM", "FT%", "3PTA",
-                                "3PTM", "3PT%", "PTS", "OREB", "DREB", "REB", "AST", "ST", "BLK","TO",
-                                "A/T", "PF", "DISQ", "TECH", "EJCT", "FF", "MPG", "DD", "TD"};
     protected int fieldGoalAttempts,fieldGoalMade,
+    numOfGamesPlayed,
     freeThrowAttempts,freeThrowMade,
     threePointsMade,
     points,
@@ -42,8 +41,43 @@ public class PlayerInfo {
         this.rebounds=this.assists=0;
         this.steals=this.blocks=0;
         this.turnovers =0;
-        this.numOfGamesToPlay = 1;
+        this.numOfGamesToPlay = 3;
+        this.numOfGamesPlayed=0;
     }
+
+    protected PlayerInfo(Parcel in) {
+        playerid = in.readString();
+        firstName = in.readString();
+        lastName = in.readString();
+        fieldGoalAttempts = in.readInt();
+        fieldGoalMade = in.readInt();
+        freeThrowAttempts = in.readInt();
+        freeThrowMade = in.readInt();
+        threePointsMade = in.readInt();
+        points = in.readInt();
+        rebounds = in.readInt();
+        assists = in.readInt();
+        steals = in.readInt();
+        blocks = in.readInt();
+        turnovers = in.readInt();
+        fieldGoalPercentage = in.readFloat();
+        freeThrowPercentage = in.readFloat();
+        teamName = in.readString();
+        numOfGamesToPlay = in.readInt();
+        numOfGamesPlayed = in.readInt();
+    }
+
+    public static final Creator<PlayerInfo> CREATOR = new Creator<PlayerInfo>() {
+        @Override
+        public PlayerInfo createFromParcel(Parcel in) {
+            return new PlayerInfo(in);
+        }
+
+        @Override
+        public PlayerInfo[] newArray(int size) {
+            return new PlayerInfo[size];
+        }
+    };
 
     //Prints current stats
     public void printStats()
@@ -78,9 +112,20 @@ public class PlayerInfo {
         turnovers = rand.nextInt(50) + 1;
     }
 
+    public void CalculateStats() {
+        fieldGoalPercentage = ((fieldGoalMade/fieldGoalAttempts)/numOfGamesPlayed)*numOfGamesToPlay;
+        freeThrowPercentage = ((freeThrowMade/freeThrowAttempts)/numOfGamesPlayed)*numOfGamesToPlay;
+    }
+
     public String toString() {
         String player = "Player ID: " + playerid + ", First Name: " + firstName + ", Last Name: " + lastName;
         return player;
+    }
+
+    public String[] getStats(){
+        String[] playerstats = {Float.toString(fieldGoalPercentage), Integer.toString(threePointsMade), Float.toString(freeThrowPercentage), Integer.toString(points), Integer.toString(rebounds),
+                                Integer.toString(assists), Integer.toString(steals), Integer.toString(blocks), Integer.toString(turnovers)};
+        return playerstats;
     }
 
     /*public void setStatsStr(String[] stats) {
@@ -104,4 +149,33 @@ public class PlayerInfo {
         return playerid;
     }
 
+    public String getName() { return firstName + " " + lastName;}
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(playerid);
+        dest.writeString(firstName);
+        dest.writeString(lastName);
+        dest.writeInt(fieldGoalAttempts);
+        dest.writeInt(fieldGoalMade);
+        dest.writeInt(freeThrowAttempts);
+        dest.writeInt(freeThrowMade);
+        dest.writeInt(threePointsMade);
+        dest.writeInt(points);
+        dest.writeInt(rebounds);
+        dest.writeInt(assists);
+        dest.writeInt(steals);
+        dest.writeInt(blocks);
+        dest.writeInt(turnovers);
+        dest.writeFloat(fieldGoalPercentage);
+        dest.writeFloat(freeThrowPercentage);
+        dest.writeString(teamName);
+        dest.writeInt(numOfGamesToPlay);
+        dest.writeInt(numOfGamesPlayed);
+    }
 }

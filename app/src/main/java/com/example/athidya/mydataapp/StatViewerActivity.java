@@ -1,38 +1,27 @@
 package com.example.athidya.mydataapp;
 
 import android.app.ActionBar;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
+import android.content.Intent;
 import android.graphics.Color;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.UiThread;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.util.AsyncListUtil;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.DiskBasedCache;
-import com.android.volley.toolbox.HttpClientStack;
-import com.android.volley.toolbox.HttpStack;
-import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
@@ -42,58 +31,46 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 
-import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
-import static com.example.athidya.mydataapp.R.id.spinner10;
-//import static com.example.athidya.mydataapp.R.id.spinner11;
 import static com.example.athidya.mydataapp.R.id.spinner12;
 import static com.example.athidya.mydataapp.R.id.spinner13;
 
 
-/*
-* remember to display the teams as the current users first, next the team he will be facing in the next week
-* and then in order underneath
-* as the weeks change the order it should be viewed in should also change
-* so make entries to match the current week
-* also default view should be current weeks line up
-* */
 public class StatViewerActivity extends AppCompatActivity {
 
+    /* TODO: make sure to reset order of teams depending on the current week
+    *  TODO: make the spinners work and update table
+    *  TODO: put update button
+    *  TODO: clean code
+    *   */
 
     final GMTeamInfo[] globalGmTeamInfos = new GMTeamInfo[14];
-    public String[] statnames = {"FGA", "FGM", "FTA", "FTM", "3PTM", "PTS", "REB", "AST", "ST", "BLK","TO"};
+    public String[] statNamesAll = {"ALL", "FG%", "3PM", "FT%", "3PTM", "PTS", "REB", "AST", "ST", "BLK","TO"};
     String URL_START = "https://fantasysports.yahooapis.com";
     String USER_INFO_URL = URL_START + "/fantasy/v2/users;use_login=1/games/leagues";
     String access_token = "";
     String matchup_response = "";
-    JSONObject playercount = null;
-    JSONArray players = null;
-    JSONArray playerstats = null;
-    JSONObject player = null;
-    JSONObject name = null;
-    String playerid = "";
-    String [] teamOrder = new String[20]; ///automate count of this by pulling matchups: count,
+    String [] teamOrder = new String[21]; ///automate count of this by pulling matchups: count,
+    String gameID = ""; //maybe needed for next activity .. if not delete TODO check
+    String league_ID = "";
     /*
       Initializing objects to see the stats on screen; to be called later and information entered into
     */
     Spinner timeSpinner;
-    Spinner teamSpinner;
     Spinner statSpinner;
 
     List<String> timeOptions;
-    List<String> teamOptions;
     List<String> statOptions;
-
-    Integer teamcountager;
-    RequestQueue mrequestQueue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)  {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stat_viewer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -105,12 +82,10 @@ public class StatViewerActivity extends AppCompatActivity {
 
         //Initializing objects to see the stats on screen; to be called later and information entered into
         timeSpinner = (Spinner) findViewById(spinner13);
-        teamSpinner = (Spinner) findViewById(spinner10);
         statSpinner = (Spinner) findViewById(spinner12);
 
-        timeOptions = new ArrayList<String>();
-        teamOptions = new ArrayList<String>();
-        statOptions = new ArrayList<String>();
+        timeOptions = new ArrayList<>();
+        statOptions = new ArrayList<>();
 
         /*
         time and stat spinners options are constant so initialized and updated here, other spinners vary so they will be initialized
@@ -121,20 +96,12 @@ public class StatViewerActivity extends AppCompatActivity {
         timeOptions.add("Last Month");
         timeOptions.add("Last Season");
 
-
-
-        ArrayAdapter<String> timedataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, timeOptions);
+        ArrayAdapter<String> timedataAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, timeOptions);
         timedataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         timeSpinner.setAdapter(timedataAdapter);
 
-        ArrayAdapter<String> teamdataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, teamOptions);
-        teamdataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        teamSpinner.setAdapter(teamdataAdapter);
-
-        for(int i = 0; i<statnames.length; i++) {
-            statOptions.add(statnames[i]);
-        }
-        ArrayAdapter<String> statdataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, statOptions);
+        Collections.addAll(statOptions, statNamesAll);
+        ArrayAdapter<String> statdataAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, statOptions);
         statdataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         statSpinner.setAdapter(statdataAdapter);
 
@@ -153,17 +120,15 @@ public class StatViewerActivity extends AppCompatActivity {
     public class MyAsyncTask extends AsyncTask<Void, Void, Void> {
 
         protected void onPreExecute() {
-            Log.d("pre thread", "here first");
-
         }
 
 
         protected Void doInBackground(Void... params) {
-            Log.d("thread start", "i got here");
             RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
             initialStatView(queue);
+            numGames(queue);
             try {
-                Thread.sleep(20000);
+                Thread.sleep(25000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -175,11 +140,11 @@ public class StatViewerActivity extends AppCompatActivity {
 
 
         protected void onPostExecute(Void avoid) {
-            Log.d("thread end", "here");
             viewMatchups();
+            setItemSelectors();
         }
 
-        public void initialStatView(RequestQueue queue) {
+        void initialStatView(RequestQueue queue) {
 
 
             getResponse(queue,USER_INFO_URL); // figure out how we can get something back from this function
@@ -199,7 +164,7 @@ public class StatViewerActivity extends AppCompatActivity {
 
 
         //Gets the first Response on the league informationa and etc
-        public void getResponse(final RequestQueue queue, String url){
+        void getResponse(final RequestQueue queue, String url){
 
             StringRequest strrequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
@@ -210,10 +175,9 @@ public class StatViewerActivity extends AppCompatActivity {
                             //Log.d("Data call back", response);
                             JSONObject responseJSON = convertToJSON(response);
                             Log.d("json", responseJSON.toString());
-                            String gameID =  getGamesId(responseJSON).toString();
-                            String league_ID = getLeagueId(responseJSON).toString();
+                            gameID = getGamesId(responseJSON);
+                            league_ID = getLeagueId(responseJSON);
                             int teamCount = Integer.parseInt(getTeamCount(responseJSON));
-                            teamcountager = teamCount;
 
                             Log.d("json", "GAME_ID = " +gameID);
                             Log.d("json", "LEAGUE_ID = " + league_ID);
@@ -229,7 +193,7 @@ public class StatViewerActivity extends AppCompatActivity {
             }){
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
-                    HashMap<String, String> headers = new HashMap<String, String>();
+                    HashMap<String, String> headers = new HashMap<>();
                     headers.put("Authorization", "Bearer " + access_token);
                     return headers;
                 }
@@ -240,25 +204,22 @@ public class StatViewerActivity extends AppCompatActivity {
 
 
         //Pull second set of Data, runs after the first request has been pushed
-        public void pullTeamData(RequestQueue queue, String gamesID, String leagueID, final int teamCount) {
+        void pullTeamData(RequestQueue queue, String gamesID, String leagueID, final int teamCount) {
 
-            String teamsUrl = URL_START + "/fantasy/v2/games;game_keys="+gamesID+"/leagues;league_keys="+leagueID+"/teams;team_keys="+leagueID+".t.1";
-            String matchupURL = "";
-            final RequestQueue queue2request = queue;
-            RequestFuture<String> future = RequestFuture.newFuture();
-            matchupRequest(queue, gamesID, leagueID, teamCount);
+            String teamsUrl;
+            matchupRequest(queue, gamesID, leagueID);
 
             // Request a string response from the provided URL.
 
             for (int i=1;i<teamCount+1;i++){
                 teamsUrl = URL_START + "/fantasy/v2/games;game_keys="+gamesID+"/leagues;league_keys="+leagueID+"/teams;team_keys="+leagueID+".t."+i+"/roster";
-                addToQueue(teamsUrl,queue2request, gamesID, leagueID);
+                addToQueue(teamsUrl, queue);
             }
 
         }
 
         //Adds data to get put into the queue to store all gm and team member information helps pullAllData
-        public void addToQueue(final String url, final RequestQueue queue, final String gamesID, final String leagueID){
+        void addToQueue(final String url, final RequestQueue queue){
 
             StringRequest request = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
@@ -276,11 +237,6 @@ public class StatViewerActivity extends AppCompatActivity {
                             Log.d("json", "Players Count = " + playerCount);
 
 
-                        /*
-                        save team names to spinner to allow user to choose specific teams info
-                         */
-                            teamOptions.add(getTeamName(responseJSON));
-
                             PlayerInfo[] playerInfo = new PlayerInfo[playerCount];
                             for (int i = 0; i<playerCount;i++)
                             {
@@ -294,7 +250,7 @@ public class StatViewerActivity extends AppCompatActivity {
                             String teamKey = getTeamKey(responseJSON);
                             String teamName = getTeamName(responseJSON);
                             globalGmTeamInfos[teamID-1]=new GMTeamInfo(teamKey,teamName,playerInfo);
-                            getPlayerStats(globalGmTeamInfos[teamID-1], queue, gamesID, leagueID, teamKey);
+                            getPlayerStats(globalGmTeamInfos[teamID-1], queue);
                         }
                     }, new Response.ErrorListener() {
                 @Override
@@ -305,7 +261,7 @@ public class StatViewerActivity extends AppCompatActivity {
             }){
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
-                    HashMap<String, String> headers = new HashMap<String, String>();
+                    HashMap<String, String> headers = new HashMap<>();
                     headers.put("Authorization", "Bearer " + access_token);
                     return headers;
                 }
@@ -316,15 +272,15 @@ public class StatViewerActivity extends AppCompatActivity {
         }
 
         //gets team matchups information from volley request
-        public void matchupRequest(final RequestQueue queue, final String gameID, final String leagueID, final int teamCount) {
+        void matchupRequest(final RequestQueue queue, final String gameID, final String leagueID) {
             String url = URL_START + "/fantasy/v2/users;use_login=1/games;game_keys=" + gameID + "/leagues;league_keys=" + leagueID + "/teams/matchups" ;
-            JSONArray tempJSONArray;
             StringRequest request = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
                             Log.d("matchup", getMatchupInfo(response));
                             matchup_response = response;
+
                         }
                     }, new Response.ErrorListener() {
                 @Override
@@ -335,7 +291,7 @@ public class StatViewerActivity extends AppCompatActivity {
             }){
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
-                    HashMap<String, String> headers = new HashMap<String, String>();
+                    HashMap<String, String> headers = new HashMap<>();
                     headers.put("Authorization", "Bearer " + access_token);
                     return headers;
                 }
@@ -346,7 +302,7 @@ public class StatViewerActivity extends AppCompatActivity {
 
         //matchup information handled here and stored in string array of teamkeys in the order of matchup against
         //logged in player
-        public String getMatchupInfo(String response) {
+        String getMatchupInfo(String response) {
             JSONObject tempJSON = convertToJSON(response);
             JSONArray tempJSONArray;
             JSONArray temp2JSONArray;
@@ -358,17 +314,27 @@ public class StatViewerActivity extends AppCompatActivity {
                 tempJSON = tempJSON.getJSONObject("game");
                 tempJSON = tempJSON.getJSONObject("leagues");
                 tempJSON = tempJSON.getJSONObject("league");
+                int current_week = tempJSON.get("current_week").hashCode() -1;
                 tempJSON = tempJSON.getJSONObject("teams");
                 tempJSON = tempJSON.getJSONObject("team");
                 teamOrder[0] = tempJSON.get("team_key").toString();
                 tempJSON = tempJSON.getJSONObject("matchups");
                 tempJSONArray = tempJSON.getJSONArray("matchup");
+
                 for(int i=1; i<tempJSONArray.length(); i++) {
                     tempJSON = tempJSONArray.getJSONObject(i-1);
                     tempJSON = tempJSON.getJSONObject("teams");
                     temp2JSONArray = tempJSON.getJSONArray("team");
                     tempJSON = temp2JSONArray.getJSONObject(1);
-                    teamOrder[i] = tempJSON.get("team_key").toString();
+                    //teamOrder[i] = "";
+                    if(i+current_week<tempJSONArray.length()) {
+                        teamOrder[i+current_week] = tempJSON.get("team_key").toString();
+                        Log.d("team order", teamOrder[i+current_week]);
+                    }
+                    else {
+                        teamOrder[i-tempJSONArray.length()+current_week+1] = tempJSON.get("team_key").toString();
+                        Log.d("team order", teamOrder[i+current_week-tempJSONArray.length()+1]);
+                    }
                 }
             } catch(JSONException e) {
                 e.printStackTrace();
@@ -381,19 +347,20 @@ public class StatViewerActivity extends AppCompatActivity {
 
             //  }
 
-            return teamOrder.toString();
+            return Arrays.toString(teamOrder);
         }
 
         //handles set up to get the individual player stats using the team keys
-        public void getPlayerStats(GMTeamInfo GMTeam, RequestQueue queue, String gamesID, String leagueID ,String teamkey) {
+        void getPlayerStats(GMTeamInfo GMTeam, RequestQueue queue) {
             for(int i=0; i<GMTeam.players.length; i++) {
                 String STATS_URL = URL_START + "/fantasy/v2/player/" + GMTeam.players[i].getPlayerid() + "/stats" ;
                 playerStatsReq(STATS_URL, queue, GMTeam, i);
+                //numGames(queue, GMTeam.players[i].getPlayerid());
             }
         }
 
         //volley request to get individual player stats info
-        public void playerStatsReq(String url, RequestQueue queue, final GMTeamInfo GMTeam, final int i){
+        void playerStatsReq(String url, RequestQueue queue, final GMTeamInfo GMTeam, final int i){
 
             StringRequest request = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
@@ -412,7 +379,7 @@ public class StatViewerActivity extends AppCompatActivity {
             }){
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
-                    HashMap<String, String> headers = new HashMap<String, String>();
+                    HashMap<String, String> headers = new HashMap<>();
                     headers.put("Authorization", "Bearer " + access_token);
                     return headers;
                 }
@@ -423,18 +390,17 @@ public class StatViewerActivity extends AppCompatActivity {
         }
 
         //info handled here
-        public void setPlayersStats(String response, GMTeamInfo GMTeam, int i) {
+        void setPlayersStats(String response, GMTeamInfo GMTeam, int i) {
 
             JSONObject tempJSON = convertToJSON(response);
-            JSONObject temp2JSON;
             JSONArray tempJSONArray;
-            String tempString;
             try {
                 tempJSON = tempJSON.getJSONObject("fantasy_content");
                 tempJSON = tempJSON.getJSONObject("player");
                 tempJSON = tempJSON.getJSONObject("player_stats");
                 tempJSON = tempJSON.getJSONObject("stats");
                 tempJSONArray = tempJSON.getJSONArray("stat");
+                //GMTeam.players[i].numOfGamesToPlay
                 GMTeam.players[i].fieldGoalAttempts = convertwCheck(tempJSONArray.getJSONObject(3).getString("value"));
                 GMTeam.players[i].fieldGoalMade = convertwCheck(tempJSONArray.getJSONObject(4).getString("value"));
                 GMTeam.players[i].freeThrowAttempts = convertwCheck(tempJSONArray.getJSONObject(6).getString("value"));
@@ -446,14 +412,14 @@ public class StatViewerActivity extends AppCompatActivity {
                 GMTeam.players[i].steals=convertwCheck(tempJSONArray.getJSONObject(17).getString("value"));
                 GMTeam.players[i].blocks=convertwCheck(tempJSONArray.getJSONObject(18).getString("value"));
                 GMTeam.players[i].turnovers=convertwCheck(tempJSONArray.getJSONObject(19).getString("value"));
-                //Log.d("set outcome", tempJSONArray.toString());
+                GMTeam.players[i].numOfGamesPlayed=convertwCheck(tempJSONArray.getJSONObject(0).getString("value"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
 
         //just to help converting players stats json
-        public Integer convertwCheck(String temp) {
+        Integer convertwCheck(String temp) {
             if(temp.equals("-")) {
                 return 0;
             }
@@ -476,13 +442,14 @@ public class StatViewerActivity extends AppCompatActivity {
         //create a column
         TextView label_TeamName = new TextView(this);
         label_TeamName.setId(View.generateViewId());
-        label_TeamName.setText("Team Name");
+        String teamLabel = "Team Name";
+        label_TeamName.setText(teamLabel);
         label_TeamName.setTextColor(Color.BLACK);
         label_TeamName.setPadding(5, 5, 5, 5);
         tr_head.addView(label_TeamName); //add to table row
 
         //create stats columns
-        String[] statsnames = {"FGA", "FGM", "FG%", "3PM", "FTA", "FTM", "FT%", "PTS", "REB", "AST", "ST", "BLK",  "TO"};
+        String[] statsnames = {"FG%", "3PM", "FT%", "PTS", "REB", "AST", "ST", "BLK",  "TO"};
         TextView[] label_stats = new TextView[statsnames.length];
         for (int i = 0; i<statsnames.length; i++) {
             label_stats[i] = new TextView(this);
@@ -500,7 +467,7 @@ public class StatViewerActivity extends AppCompatActivity {
         tr_head.addView(label_stats); */
 
         t1.addView(tr_head, new TableLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        TextView[] teamNames = new TextView[teamOrder.length];
+        final TextView[] teamNames = new TextView[teamOrder.length];
         TextView[][] teamStats = new TextView[teamOrder.length][statsnames.length];
         TableRow[] tr_list = new TableRow[teamOrder.length];
 
@@ -517,9 +484,23 @@ public class StatViewerActivity extends AppCompatActivity {
             teamNames[i].setPadding(5, 5, 5, 5);
 
             for(int j = 0; j<globalGmTeamInfos.length; j++) {
-                if(teamOrder[i-1].equals(globalGmTeamInfos[j].teamKey)) {
+                Log.d("globaljm", globalGmTeamInfos[j].teamKey);
+                 if(teamOrder[i-1].equals(globalGmTeamInfos[j].teamKey)) {
                     globalGmTeamInfos[j].CalculateTotal();
                     teamNames[i].setText(globalGmTeamInfos[j].teamName);
+                    final int finalJ = j;
+                    teamNames[i].setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent teampredictions = new Intent(getApplicationContext(), PredictionsActivity.class);
+                            teampredictions.putExtra("Team Players", globalGmTeamInfos[finalJ].players);
+                            teampredictions.putExtra("Team Name", globalGmTeamInfos[finalJ].teamName);
+                            teampredictions.putExtra("Team Key", globalGmTeamInfos[finalJ].teamKey);
+                            teampredictions.putExtra("League ID", league_ID);
+                            teampredictions.putExtra("Game ID", gameID);
+                            startActivity(teampredictions);
+                        }
+                    });
 
                     String [] stats = globalGmTeamInfos[j].getStats();
                     tr_list[i].addView(teamNames[i]);
@@ -538,6 +519,66 @@ public class StatViewerActivity extends AppCompatActivity {
             }
             t1.addView(tr_list[i]);
         }
+    }
+
+    public void setItemSelectors(){
+        timeSpinner.setOnItemSelectedListener(
+                new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        String time = timeSpinner.getSelectedItem().toString();
+
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                }
+        );
+        statSpinner.setOnItemSelectedListener((
+                new AdapterView.OnItemSelectedListener(){
+
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                }
+                ));
+    }
+
+    public void numGames(RequestQueue queue) {
+                         //String playerKey) {
+        //String url = URL_START + "/fantasy/v2/player/" + playerKey + "/metadata";
+        String testurl = URL_START + "/fantasy/v2/games;game_key=375/editorial_teams;editorial_team_key=nba.t.9";
+        StringRequest request = new StringRequest(Request.Method.GET, testurl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        privateLogger("NUMBER OF GAMES", response);
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("NUMBER OF GAMES","That didn't work!");
+                error.printStackTrace();
+            }
+        }){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + access_token);
+                return headers;
+            }
+        };
+        queue.add(request);
+
     }
 
 
@@ -562,16 +603,16 @@ public class StatViewerActivity extends AppCompatActivity {
 
 
     //Logs the response for us to see
-    public void privateLogger(String response){
+    public void privateLogger(String datacall, String response){
         // displays all received information correctly in the Log without cutoff
-        List<String> printlog = new ArrayList<String>();
+        List<String> printlog = new ArrayList<>();
         int index = 0;
         while (index < response.length()) {
             printlog.add(response.substring(index, Math.min(index + 2000, response.length())));
             index +=2000;
         }
         for (int i = 0; i<printlog.size(); i++) {
-            Log.d("data call", printlog.get(i));
+            Log.d(datacall, printlog.get(i));
         }
     }
 
@@ -669,7 +710,6 @@ public class StatViewerActivity extends AppCompatActivity {
     //Get team name
     public String getTeamName(JSONObject response) {
         JSONObject tempJSON;
-        JSONArray tempJSONArray;
         String tempString;
         try {
             tempJSON = response.getJSONObject("fantasy_content");
@@ -692,7 +732,6 @@ public class StatViewerActivity extends AppCompatActivity {
     //Get team key
     public String getTeamKey(JSONObject response) {
         JSONObject tempJSON;
-        JSONArray tempJSONArray;
         String tempString;
         try {
             tempJSON = response.getJSONObject("fantasy_content");
@@ -715,7 +754,6 @@ public class StatViewerActivity extends AppCompatActivity {
     //Get team key
     public String getTeamID(JSONObject response) {
         JSONObject tempJSON;
-        JSONArray tempJSONArray;
         String tempString;
         try {
             tempJSON = response.getJSONObject("fantasy_content");
@@ -738,7 +776,6 @@ public class StatViewerActivity extends AppCompatActivity {
     //Get players count
     public String getPlayerCount(JSONObject response) {
         JSONObject tempJSON;
-        JSONArray tempJSONArray;
         String tempString;
         try {
             tempJSON = response.getJSONObject("fantasy_content");

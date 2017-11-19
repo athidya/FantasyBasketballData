@@ -48,6 +48,10 @@
         <activity
             android:name=".StatViewerActivity"
             android:label="@string/title_activity_stat_viewer"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".PredictionsActivity"
+            android:label="@string/title_activity_predictions"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
